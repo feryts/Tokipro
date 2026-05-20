@@ -183,6 +183,20 @@ html,body{height:100%;overflow:hidden;background:#111;color:#e8e8e8;font-family:
 .dp-teslim.done{background:#4caf82;border-color:#4caf82;color:#fff}
 .dp-summary{font-family:monospace;font-size:11px;color:#444;line-height:2;margin-top:12px;padding-top:10px;border-top:1px solid #2a2a2a}
 
+/* ── MÜŞTERİ ARAMA ── */
+.blok-pin.highlight .pin-circle{
+  box-shadow:0 0 0 5px #fff, 0 0 0 9px #E63329, 0 0 28px rgba(230,51,41,.8);
+  animation:pinPulse 1s ease-in-out infinite;
+}
+@keyframes pinPulse{0%,100%{box-shadow:0 0 0 5px #fff,0 0 0 9px #E63329,0 0 28px rgba(230,51,41,.8)}50%{box-shadow:0 0 0 5px #fff,0 0 0 12px #E63329,0 0 40px rgba(230,51,41,1)}}
+
+.suggest-item{
+  padding:10px 12px;border-bottom:1px solid #1e1e1e;cursor:pointer;
+  font-size:13px;display:flex;align-items:center;gap:8px;
+}
+.suggest-item:active{background:#2a2a2a}
+.suggest-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#2a2a2a}
 </style>
@@ -198,6 +212,7 @@ html,body{height:100%;overflow:hidden;background:#111;color:#e8e8e8;font-family:
   </label>
   <button class="tb-btn" id="btn-blok" onclick="startPlaceMode()">📍 BLOK EKLE</button>
   <button class="tb-btn" id="btn-draw" onclick="startDrawMode()">✏ ÇİZ</button>
+  <button class="tb-btn" id="btn-musteri" onclick="openMusteriSheet()">👤 MÜŞTERİ</button>
   <button class="tb-btn" id="btn-dagitim" onclick="openDagitim()">📋 DAĞITIM</button>
   <div id="tb-stat">0 müşteri</div>
 </div>
@@ -267,6 +282,50 @@ html,body{height:100%;overflow:hidden;background:#111;color:#e8e8e8;font-family:
       <input class="inp" id="new-m-name" placeholder="Müşteri adı…" onkeydown="if(event.key==='Enter')addMusteri()">
       <input class="inp" id="new-m-note" placeholder="Not" style="width:80px">
       <button onclick="addMusteri()">+ EKLE</button>
+    </div>
+  </div>
+</div>
+
+<!-- MÜŞTERİ SHEET -->
+<div class="overlay" id="musteri-overlay" onclick="if(event.target===this)closeMusteriSheet()">
+  <div class="sheet">
+    <h3>
+      👤 MÜŞTERİ EKLE / ARA
+      <button class="sheet-close" onclick="closeMusteriSheet()">✕</button>
+    </h3>
+
+    <!-- Giriş formu -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      <div>
+        <label style="font-size:10px;color:#555;font-family:monospace;display:block;margin-bottom:4px">AD SOYAD</label>
+        <input class="inp" id="mi-adi" placeholder="Ahmet Yılmaz" oninput="miSearch()">
+      </div>
+      <div>
+        <label style="font-size:10px;color:#555;font-family:monospace;display:block;margin-bottom:4px">BLOK NO / ADI</label>
+        <input class="inp" id="mi-blok" placeholder="1, A Blok, 2. Etap..." oninput="miBlokSearch()" autocomplete="off">
+        <!-- Blok önerileri -->
+        <div id="mi-suggest" style="background:#111;border:1px solid #2a2a2a;display:none;max-height:160px;overflow-y:auto"></div>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#555;font-family:monospace;display:block;margin-bottom:4px">NOT (opsiyonel)</label>
+        <input class="inp" id="mi-not" placeholder="Daire no, kat...">
+      </div>
+      <button style="width:100%;padding:12px;background:#E63329;color:#fff;border:none;font-weight:700;font-size:13px;cursor:pointer;border-radius:2px;letter-spacing:1px" onclick="miEkle()">+ MÜŞTERİ EKLE & HARİTADA GÖSTER</button>
+    </div>
+
+    <!-- Arama sonucu -->
+    <div id="mi-result" style="display:none;background:#111;border:1px solid #2a2a2a;border-left:3px solid #E63329;padding:14px;margin-bottom:14px">
+      <div style="font-size:24px;font-weight:900;color:#E63329;font-family:monospace" id="mi-r-blok">—</div>
+      <div style="font-size:15px;font-weight:600;margin-top:4px" id="mi-r-adi">—</div>
+      <div style="font-size:11px;color:#555;font-family:monospace;margin-top:4px" id="mi-r-meta">—</div>
+      <button style="margin-top:10px;width:100%;padding:9px;background:transparent;border:1px solid #E63329;color:#E63329;font-size:12px;font-weight:700;cursor:pointer;border-radius:2px" onclick="miGoToBlok()">📍 HARİTADA GÖSTER</button>
+    </div>
+
+    <!-- Mevcut müşteri arama -->
+    <div>
+      <label style="font-size:10px;color:#555;font-family:monospace;display:block;margin-bottom:6px">KAYITLI MÜŞTERİLER</label>
+      <input class="inp" id="mi-search" placeholder="İsim veya blok ara..." oninput="miFilter(this.value)" style="margin-bottom:8px">
+      <div id="mi-list" style="max-height:200px;overflow-y:auto"></div>
     </div>
   </div>
 </div>
