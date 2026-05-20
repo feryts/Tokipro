@@ -6,939 +6,754 @@
 <title>TOKİ Dağıtım</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#111;color:#e8e8e8;font-family:'Segoe UI',system-ui,sans-serif;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#111;color:#e8e8e8;font-family:'Segoe UI',system-ui,sans-serif}
 
-/* ── TOP BAR ── */
+/* TOPBAR */
 #topbar{
-  position:fixed;top:0;left:0;right:0;height:50px;
+  position:fixed;top:0;left:0;right:0;height:52px;
   background:#1a1a1a;border-bottom:2px solid #E63329;
-  display:flex;align-items:center;gap:0;z-index:100;
-  overflow-x:auto;overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
+  display:flex;align-items:stretch;z-index:10;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
 }
 #topbar::-webkit-scrollbar{display:none}
-.badge{background:#E63329;color:#fff;font-weight:900;font-size:13px;letter-spacing:2px;padding:0 10px;height:100%;display:flex;align-items:center;flex-shrink:0}
-.tb-btn{
-  height:100%;padding:0 12px;font-size:11px;font-weight:700;letter-spacing:.5px;
-  border:none;border-left:1px solid #2a2a2a;background:transparent;color:#888;
-  cursor:pointer;white-space:nowrap;flex-shrink:0;
-  display:flex;align-items:center;gap:5px;
-  transition:background .15s,color .15s;
-}
-.tb-btn:hover,.tb-btn:active{background:#2a2a2a;color:#e8e8e8}
-.tb-btn.active{background:#E63329;color:#fff}
-.tb-btn.green{background:#2a7a4a;color:#fff}
-#tb-stat{margin-left:auto;padding:0 12px;font-size:10px;color:#444;font-family:monospace;white-space:nowrap;flex-shrink:0}
+.logo{background:#E63329;color:#fff;font-weight:900;font-size:14px;letter-spacing:3px;padding:0 12px;display:flex;align-items:center;flex-shrink:0}
+.tb{border:none;border-left:1px solid #2a2a2a;background:transparent;color:#888;font-size:11px;font-weight:700;padding:0 14px;cursor:pointer;white-space:nowrap;flex-shrink:0;letter-spacing:.5px}
+.tb:active,.tb.on{background:#E63329;color:#fff}
+#stat{margin-left:auto;padding:0 12px;font-size:10px;color:#444;font-family:monospace;display:flex;align-items:center;flex-shrink:0}
 
-/* ── MAP ── */
-#map-area{
-  position:fixed;top:50px;left:0;right:0;bottom:0;
-  overflow:hidden;background:#0a0a0a;
-}
+/* MAP */
+#mapbox{position:fixed;top:52px;left:0;right:0;bottom:0;overflow:hidden;background:#0a0a0a;touch-action:none}
+#upscreen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0a0a0a}
+#upscreen .icon{font-size:56px;opacity:.2}
+#upscreen p{color:#444;font-size:13px}
+#uplbl{background:#E63329;color:#fff;font-weight:700;font-size:14px;padding:14px 28px;border-radius:4px;cursor:pointer;letter-spacing:1px}
+#uplbl input{display:none}
 
-/* Upload screen */
-#upload-screen{
-  position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:16px;z-index:5;
-}
-#upload-btn{
-  background:#E63329;color:#fff;border:none;
-  font-size:15px;font-weight:700;padding:16px 32px;
-  border-radius:4px;cursor:pointer;letter-spacing:1px;
-}
-#upload-btn input{display:none}
-.up-icon{font-size:64px;opacity:.25}
-#upload-screen p{color:#444;font-size:13px}
+#wrap{position:absolute;top:0;left:0;transform-origin:0 0;display:none}
+#img{display:block;touch-action:none;user-select:none;pointer-events:none}
+#svglay{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
 
-/* Map transform wrapper */
-#map-wrap{
-  position:absolute;top:0;left:0;
-  transform-origin:0 0;
-  touch-action:none;
-}
-#plan-img{display:block;user-select:none;pointer-events:none;max-width:none}
-#svg-ol{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
-#svg-ol.draw-mode{pointer-events:all;cursor:crosshair}
+/* PINS */
+.pin{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;z-index:5;touch-action:manipulation}
+.pin-c{border-radius:50%;background:#E63329;border:3px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:10px;text-align:center;line-height:1.15;padding:5px;box-shadow:0 4px 14px rgba(230,51,41,.55);min-width:50px;min-height:50px;transition:box-shadow .2s}
+.pin.lit .pin-c{box-shadow:0 0 0 4px #fff,0 0 0 8px #E63329,0 0 30px rgba(230,51,41,.9);animation:glow 1s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 4px #fff,0 0 0 8px #E63329,0 0 30px rgba(230,51,41,.9)}50%{box-shadow:0 0 0 4px #fff,0 0 0 12px #E63329,0 0 45px rgba(230,51,41,1)}}
+.pin-n{margin-top:3px;background:#0f0f0f;color:#e8e8e8;font-size:9px;font-family:monospace;padding:2px 6px;border:1px solid #E63329;white-space:nowrap}
 
-/* ── BLOCK PINS ── */
-.blok-pin{
-  position:absolute;transform:translate(-50%,-50%);
-  display:flex;flex-direction:column;align-items:center;
-  cursor:pointer;z-index:10;
-  transition:transform .15s;
-}
-.blok-pin:active{transform:translate(-50%,-50%) scale(.92)}
-.pin-circle{
-  border-radius:50%;background:#E63329;border:3px solid #fff;
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-weight:900;font-size:10px;text-align:center;
-  line-height:1.1;padding:4px;
-  box-shadow:0 4px 16px rgba(230,51,41,.55);
-  min-width:48px;min-height:48px;
-}
-.pin-count{
-  margin-top:3px;background:#0f0f0f;color:#e8e8e8;
-  font-size:9px;font-family:monospace;padding:2px 6px;
-  border:1px solid #E63329;white-space:nowrap;
-}
+/* ZOOM */
+#zbtns{position:fixed;bottom:16px;right:12px;display:flex;flex-direction:column;gap:4px;z-index:9}
+.zb{width:42px;height:42px;background:#1a1a1a;border:1px solid #333;color:#e8e8e8;font-size:20px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.zb:active{background:#E63329}
 
-/* ── ZOOM BTNS ── */
-#zoom-btns{
-  position:fixed;bottom:16px;right:12px;
-  display:flex;flex-direction:column;gap:4px;z-index:50;
-}
-.zbtn{
-  width:42px;height:42px;background:#1a1a1a;border:1px solid #333;
-  color:#e8e8e8;font-size:20px;cursor:pointer;border-radius:4px;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 8px rgba(0,0,0,.4);
-  -webkit-user-select:none;user-select:none;
-}
-.zbtn:active{background:#E63329}
+/* DRAW BAR */
+#dbar{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:2px solid #f5c842;padding:8px 14px;font-size:11px;font-family:monospace;color:#f5c842;display:none;align-items:center;gap:8px;z-index:9;border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.6);white-space:nowrap}
+#dbar.on{display:flex}
+.db{padding:5px 10px;border:1px solid currentColor;background:transparent;font-size:11px;cursor:pointer;border-radius:2px;font-family:monospace;color:inherit}
 
-/* ── DRAW BAR ── */
-#draw-bar{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  background:#1a1a1a;border:1px solid #f5c842;
-  padding:8px 14px;font-size:11px;font-family:monospace;color:#f5c842;
-  display:none;align-items:center;gap:10px;z-index:60;
-  white-space:nowrap;border-radius:4px;
-  box-shadow:0 4px 16px rgba(0,0,0,.5);
-}
-#draw-bar.show{display:flex}
-.dbar-btn{padding:5px 10px;border:1px solid currentColor;background:transparent;font-size:11px;cursor:pointer;border-radius:2px;font-family:monospace}
+/* SHEET OVERLAY */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:none;align-items:flex-end}
+.ov.on{display:flex}
+.sh{background:#1a1a1a;border-radius:16px 16px 0 0;border-top:2px solid #E63329;padding:20px 16px 32px;width:100%;max-height:85vh;overflow-y:auto}
+.sh-head{display:flex;align-items:center;margin-bottom:18px}
+.sh-title{font-size:15px;font-weight:700;letter-spacing:1px;flex:1}
+.sh-x{background:transparent;border:none;color:#555;font-size:24px;cursor:pointer;line-height:1;padding:4px}
 
-/* ── MODALS / SHEETS ── */
-.overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;
-  display:none;align-items:flex-end;justify-content:center;
-}
-.overlay.show{display:flex}
-.sheet{
-  background:#1a1a1a;border-radius:14px 14px 0 0;
-  border-top:2px solid #E63329;padding:20px 16px;
-  width:100%;max-height:90vh;overflow-y:auto;
-}
-.sheet h3{font-size:14px;font-weight:700;letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.sheet-close{margin-left:auto;background:transparent;border:none;color:#555;font-size:22px;cursor:pointer;line-height:1;padding:0}
-
-/* Center modal (name input) */
-.center-modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;
-  display:none;align-items:center;justify-content:center;padding:20px;
-}
-.center-modal.show{display:flex}
-.cmodal{
-  background:#1a1a1a;border-top:2px solid #E63329;
-  padding:20px;width:100%;max-width:360px;border-radius:4px;
-}
-.cmodal h3{font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:14px}
-.cmodal label{font-size:10px;color:#555;font-family:monospace;display:block;margin-bottom:4px}
-.inp{
-  width:100%;background:#111;border:1px solid #2a2a2a;color:#e8e8e8;
-  font-size:14px;padding:10px 12px;outline:none;border-radius:2px;margin-bottom:10px;
-}
+/* INPUTS */
+.lbl{font-size:10px;color:#555;font-family:monospace;display:block;margin-bottom:5px;letter-spacing:1px}
+.inp{width:100%;background:#111;border:1px solid #333;color:#e8e8e8;font-size:15px;padding:12px 14px;outline:none;border-radius:4px;margin-bottom:12px;text-transform:uppercase;-webkit-appearance:none;appearance:none}
 .inp:focus{border-color:#E63329}
-.modal-row{display:flex;gap:8px}
-.modal-row button{flex:1;padding:10px;font-weight:700;font-size:13px;border:none;cursor:pointer;border-radius:2px}
+.inp::placeholder{text-transform:none;color:#333}
+
+/* BUTTONS */
+.btn-red{width:100%;padding:14px;background:#E63329;color:#fff;border:none;font-weight:700;font-size:14px;border-radius:4px;cursor:pointer;letter-spacing:1px;margin-top:4px}
+.btn-red:active{background:#c8241b}
+.btn-out{width:100%;padding:11px;background:transparent;border:1px solid #333;color:#888;font-size:12px;border-radius:4px;cursor:pointer;margin-top:8px}
+.btn-out:active{background:#2a2a2a}
+
+/* SUGGEST */
+#sug{background:#111;border:1px solid #333;border-top:none;border-radius:0 0 4px 4px;display:none;max-height:160px;overflow-y:auto;margin-top:-12px;margin-bottom:12px}
+.sug-row{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid #1e1e1e;font-size:13px}
+.sug-row:active{background:#2a2a2a}
+.sug-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* RESULT CARD */
+#mcard{background:#111;border:1px solid #333;border-left:4px solid #E63329;border-radius:4px;padding:14px;margin-bottom:16px;display:none}
+#mc-blok{font-size:26px;font-weight:900;color:#E63329;font-family:monospace;line-height:1}
+#mc-adi{font-size:15px;font-weight:600;margin-top:5px}
+#mc-meta{font-size:11px;color:#555;font-family:monospace;margin-top:3px}
+#mc-goto{margin-top:10px;width:100%;padding:9px;background:transparent;border:1px solid #E63329;color:#E63329;font-size:12px;font-weight:700;border-radius:4px;cursor:pointer}
+
+/* MUSTERI LIST */
+.mrow{display:flex;align-items:center;gap:8px;padding:11px 0;border-bottom:1px solid #1e1e1e}
+.mrow:last-child{border:none}
+.mrow-num{font-size:10px;color:#444;font-family:monospace;width:20px;flex-shrink:0}
+.mrow-info{flex:1;min-width:0}
+.mrow-name{font-size:13px;font-weight:600;text-transform:uppercase}
+.mrow-sub{font-size:10px;color:#555;font-family:monospace}
+.mrow-teslim{padding:6px 10px;font-size:10px;font-weight:700;border:1px solid #333;background:transparent;color:#666;cursor:pointer;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.mrow-teslim:active{background:#4caf82;border-color:#4caf82;color:#fff}
+.mrow-del{width:30px;height:30px;background:transparent;border:1px solid #2a2a2a;color:#E63329;font-size:14px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* DAGITIM */
+.drow{background:#111;border:1px solid #2a2a2a;border-radius:4px;padding:12px;margin-bottom:8px}
+.drow-ord{font-size:10px;color:#555;font-family:monospace;margin-bottom:3px}
+.drow-name{font-size:14px;font-weight:700;text-transform:uppercase}
+.drow-blok{font-size:10px;color:#555;font-family:monospace;margin-bottom:10px}
+.drow-acts{display:flex;gap:6px}
+.drow-mv{width:36px;height:36px;background:transparent;border:1px solid #2a2a2a;color:#888;font-size:15px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.drow-mv:active{background:#2a2a2a}
+.drow-teslim{flex:1;padding:9px;font-size:11px;font-weight:700;border:1px solid #333;background:transparent;color:#666;border-radius:3px;cursor:pointer}
+.drow-teslim:active{background:#4caf82;border-color:#4caf82;color:#fff}
+
+/* BLOK SHEET extras */
+.blok-acts{display:flex;gap:8px;margin-bottom:16px}
+.blok-acts button{flex:1;padding:9px;background:transparent;font-size:11px;border-radius:3px;cursor:pointer}
+.ba-edit{border:1px solid #333;color:#888}
+.ba-del{border:1px solid #E63329;color:#E63329}
+.ba-edit:active{background:#2a2a2a}
+.ba-del:active{background:#E63329;color:#fff}
+
+.add-m{display:flex;gap:6px;margin-top:14px;padding-top:14px;border-top:1px solid #2a2a2a}
+.add-m .inp{margin:0;font-size:13px;flex:1}
+.add-m .add-m-btn{padding:12px 14px;background:#E63329;border:none;color:#fff;font-weight:700;font-size:13px;border-radius:4px;cursor:pointer;white-space:nowrap}
+
+.empty{font-size:12px;color:#333;text-align:center;padding:16px;font-family:monospace}
+
+/* NAME MODAL */
+#namemod{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+#namemod.on{display:flex}
+#namemod .box{background:#1a1a1a;border-top:2px solid #E63329;border-radius:6px;padding:22px;width:100%;max-width:360px}
+#namemod h3{font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:16px}
+.mrow-btns{display:flex;gap:8px;margin-top:4px}
+.mrow-btns button{flex:1;padding:11px;font-weight:700;font-size:13px;border:none;border-radius:4px;cursor:pointer}
 .mok{background:#E63329;color:#fff}
+.mok:active{background:#c8241b}
 .mcancel{background:#2a2a2a;color:#888}
-.mdel{background:transparent;border:1px solid #E63329!important;color:#E63329;flex:0 0 auto;padding:10px 14px}
-
-/* Müşteri listesi */
-.m-row{
-  display:flex;align-items:center;gap:8px;
-  padding:10px 0;border-bottom:1px solid #1e1e1e;
-}
-.m-row:last-child{border:none}
-.m-num{font-size:10px;color:#444;font-family:monospace;width:18px;flex-shrink:0}
-.m-info{flex:1;min-width:0}
-.m-name{font-size:13px;font-weight:600}
-.m-note{font-size:10px;color:#555;font-family:monospace}
-.m-teslim{
-  padding:5px 10px;font-size:10px;font-weight:700;
-  border:1px solid #2a2a2a;background:transparent;color:#666;
-  cursor:pointer;border-radius:2px;white-space:nowrap;
-  transition:all .2s;flex-shrink:0;
-}
-.m-teslim.done{background:#4caf82;border-color:#4caf82;color:#fff}
-.m-act{width:30px;height:30px;background:transparent;border:1px solid #2a2a2a;color:#555;font-size:13px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.m-act:active{background:#2a2a2a}
-
-.add-row{display:flex;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #2a2a2a}
-.add-row .inp{margin:0;font-size:13px}
-.add-row button{padding:10px 14px;background:#E63329;border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;border-radius:2px;white-space:nowrap}
-
-/* Dagitim sheet */
-.dp-item{background:#111;border:1px solid #2a2a2a;border-radius:3px;padding:10px 12px;margin-bottom:6px}
-.dp-item.done-item{border-left:3px solid #4caf82;opacity:.6}
-.dp-ord{font-size:10px;color:#555;font-family:monospace;margin-bottom:2px}
-.dp-name{font-size:13px;font-weight:700}
-.dp-blok{font-size:10px;color:#555;font-family:monospace;margin-bottom:8px}
-.dp-acts{display:flex;gap:4px}
-.dp-mv{width:32px;height:32px;background:transparent;border:1px solid #2a2a2a;color:#666;font-size:14px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center}
-.dp-mv:active{background:#2a2a2a}
-.dp-teslim{flex:1;padding:8px;font-size:11px;font-weight:700;border:1px solid #2a2a2a;background:transparent;color:#666;cursor:pointer;border-radius:2px}
-.dp-teslim.done{background:#4caf82;border-color:#4caf82;color:#fff}
-.dp-summary{font-family:monospace;font-size:11px;color:#444;line-height:2;margin-top:12px;padding-top:10px;border-top:1px solid #2a2a2a}
-
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:#2a2a2a}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- TOPBAR -->
 <div id="topbar">
-  <div class="badge">TOKİ</div>
-  <label class="tb-btn">
+  <div class="logo">TOKİ</div>
+  <label class="tb" style="cursor:pointer;display:flex;align-items:center">
     🗺 HARİTA
     <input type="file" accept="image/*" style="display:none" onchange="loadImg(this)">
   </label>
-  <button class="tb-btn" id="btn-blok" onclick="startPlaceMode()">📍 BLOK EKLE</button>
-  <button class="tb-btn" id="btn-draw" onclick="startDrawMode()">✏ ÇİZ</button>
-  <button class="tb-btn" id="btn-dagitim" onclick="openDagitim()">📋 DAĞITIM</button>
-  <div id="tb-stat">0 müşteri</div>
+  <button class="tb" id="tbBlok" onclick="startPlace()">📍 BLOK</button>
+  <button class="tb" id="tbCiz" onclick="startDraw()">✏ ÇİZ</button>
+  <button class="tb" onclick="openSheet('musteri')">👤 MÜŞTERİ</button>
+  <button class="tb" onclick="openSheet('dagitim')">📋 DAĞITIM</button>
+  <div id="stat">0 kişi</div>
 </div>
 
-<!-- MAP AREA -->
-<div id="map-area">
-  <div id="upload-screen">
-    <div class="up-icon">🏗️</div>
+<!-- MAP -->
+<div id="mapbox">
+  <div id="upscreen">
+    <div class="icon">🏗️</div>
     <p>Vaziyet planını yükleyin</p>
-    <label id="upload-btn">
+    <label id="uplbl">
       📂 HARİTA YÜKLE
       <input type="file" accept="image/*" onchange="loadImg(this)">
     </label>
-    <p style="font-size:11px;color:#333">PNG, JPG desteklenir</p>
   </div>
-
-  <div id="map-wrap">
-    <img id="plan-img" src="" alt="plan" draggable="false">
-    <svg id="svg-ol"></svg>
-    <!-- pins injected here -->
+  <div id="wrap">
+    <img id="img" src="" alt="" draggable="false">
+    <svg id="svglay"></svg>
   </div>
 </div>
 
-<!-- ZOOM -->
-<div id="zoom-btns">
-  <button class="zbtn" id="zin" ontouchstart="zoomHold(1.06)" ontouchend="zoomStop()" onclick="doZoom(1.25)">＋</button>
-  <button class="zbtn" id="zout" ontouchstart="zoomHold(1/1.06)" ontouchend="zoomStop()" onclick="doZoom(.8)">－</button>
-  <button class="zbtn" onclick="fitMap()">⊡</button>
+<!-- ZOOM BUTTONS -->
+<div id="zbtns">
+  <button class="zb" onclick="zoom(1.3)">＋</button>
+  <button class="zb" onclick="zoom(0.75)">－</button>
+  <button class="zb" onclick="fit()">⊡</button>
 </div>
 
 <!-- DRAW BAR -->
-<div id="draw-bar">
-  <span id="draw-txt" style="color:#f5c842">Parmağınızla blok sınırını çizin</span>
-  <button class="dbar-btn" style="color:#4caf82;border-color:#4caf82" onclick="closePoly()">✓ BİTİR</button>
-  <button class="dbar-btn" style="color:#aaa;border-color:#444" onclick="undoPt()">↩</button>
-  <button class="dbar-btn" style="color:#E63329;border-color:#E63329" onclick="cancelDraw()">✕</button>
+<div id="dbar">
+  <span>Noktaları işaretleyin</span>
+  <button class="db" style="color:#4caf82;border-color:#4caf82" onclick="endDraw()">✓ BİTİR</button>
+  <button class="db" style="color:#aaa" onclick="undoPt()">↩</button>
+  <button class="db" style="color:#E63329;border-color:#E63329" onclick="cancelDraw()">✕</button>
 </div>
 
 <!-- BLOK NAME MODAL -->
-<div class="center-modal" id="name-modal">
-  <div class="cmodal">
-    <h3 id="name-modal-title">BLOK ADI</h3>
-    <label>AD / NUMARA</label>
-    <input class="inp" id="name-inp" placeholder="örn. 1. Blok, A Blok, 2. Etap">
-    <div class="modal-row">
+<div id="namemod">
+  <div class="box">
+    <h3>BLOK ADI GİR</h3>
+    <label class="lbl">AD / NUMARA</label>
+    <input class="inp" id="nameinp" placeholder="örn. A BLOK, 1. ETAP" onkeydown="if(event.key==='Enter')saveName()">
+    <div class="mrow-btns">
       <button class="mcancel" onclick="cancelName()">İptal</button>
-      <button class="mok" onclick="confirmName()">Kaydet</button>
+      <button class="mok" onclick="saveName()">Kaydet</button>
     </div>
   </div>
 </div>
 
-<!-- BLOK POPUP (müşteri listesi) -->
-<div class="overlay" id="blok-overlay" onclick="if(event.target===this)closeBlokSheet()">
-  <div class="sheet" id="blok-sheet">
-    <h3>
-      <span id="bs-dot" style="width:12px;height:12px;border-radius:50%;background:#E63329;display:inline-block"></span>
-      <span id="bs-title">Blok</span>
-      <button class="sheet-close" onclick="closeBlokSheet()">✕</button>
-    </h3>
-    <!-- edit/delete blok -->
-    <div style="display:flex;gap:6px;margin-bottom:14px">
-      <button style="flex:1;padding:7px;background:transparent;border:1px solid #2a2a2a;color:#888;font-size:11px;cursor:pointer;border-radius:2px" onclick="editBlokName()">⚙ Blok Adını Düzenle</button>
-      <button style="padding:7px 12px;background:transparent;border:1px solid #E63329;color:#E63329;font-size:11px;cursor:pointer;border-radius:2px" onclick="deleteBlok()">✕ Sil</button>
+<!-- MÜŞTERİ SHEET -->
+<div class="ov" id="ov-musteri">
+  <div class="sh">
+    <div class="sh-head">
+      <div class="sh-title">👤 MÜŞTERİ EKLE / ARA</div>
+      <button class="sh-x" onclick="closeSheet('musteri')">✕</button>
+    </div>
+
+    <label class="lbl">AD SOYAD</label>
+    <input class="inp" id="mi-adi" placeholder="Ahmet Yılmaz" autocomplete="off" autocorrect="off" spellcheck="false">
+
+    <label class="lbl">BLOK NO / ADI</label>
+    <input class="inp" id="mi-blok" placeholder="A Blok, 1. Etap..." autocomplete="off" oninput="blokSuggest()">
+    <div id="sug"></div>
+
+    <label class="lbl">NOT (daire, kat...)</label>
+    <input class="inp" id="mi-not" placeholder="Daire 5, 3. Kat" autocomplete="off">
+
+    <button class="btn-red" onclick="miEkle()">+ EKLE VE HARİTADA GÖSTER</button>
+
+    <div id="mcard">
+      <div id="mc-blok">—</div>
+      <div id="mc-adi">—</div>
+      <div id="mc-meta">—</div>
+      <button id="mc-goto" onclick="mcGoto()">📍 HARİTADA GÖSTER</button>
+    </div>
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid #2a2a2a">
+      <label class="lbl">KAYITLI MÜŞTERİLER</label>
+      <input class="inp" id="mi-ara" placeholder="İsim veya blok ara..." oninput="miFilter(this.value)" autocomplete="off">
+      <div id="mi-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOK SHEET -->
+<div class="ov" id="ov-blok">
+  <div class="sh">
+    <div class="sh-head">
+      <div class="sh-title" id="bs-title">Blok</div>
+      <button class="sh-x" onclick="closeSheet('blok')">✕</button>
+    </div>
+    <div class="blok-acts">
+      <button class="ba-edit" onclick="editBlokName()">⚙ Adı Düzenle</button>
+      <button class="ba-del" onclick="delBlok()">✕ Bloğu Sil</button>
     </div>
     <div id="bs-list"></div>
-    <div class="add-row">
-      <input class="inp" id="new-m-name" placeholder="Müşteri adı…" onkeydown="if(event.key==='Enter')addMusteri()">
-      <input class="inp" id="new-m-note" placeholder="Not" style="width:80px">
-      <button onclick="addMusteri()">+ EKLE</button>
+    <div class="add-m">
+      <input class="inp" id="bs-minp" placeholder="Müşteri adı..." onkeydown="if(event.key==='Enter')bsAddM()" autocomplete="off" autocorrect="off" spellcheck="false">
+      <input class="inp" id="bs-mnot" placeholder="Not" style="width:90px" autocomplete="off">
+      <button class="add-m-btn" onclick="bsAddM()">EKLE</button>
     </div>
   </div>
 </div>
 
 <!-- DAĞITIM SHEET -->
-<div class="overlay" id="dag-overlay" onclick="if(event.target===this)closeDagitim()">
-  <div class="sheet">
-    <h3>
-      📋 DAĞITIM SIRASI
-      <button class="sheet-close" onclick="closeDagitim()">✕</button>
-    </h3>
-    <div id="dag-list"></div>
-    <div class="dp-summary" id="dag-summary"></div>
-  </div>
-</div>
-
-<!-- EDIT MUSTERI MODAL -->
-<div class="center-modal" id="edit-m-modal">
-  <div class="cmodal">
-    <h3>MÜŞTERİ DÜZENLE</h3>
-    <label>AD SOYAD</label>
-    <input class="inp" id="edit-m-name" placeholder="Ahmet Yılmaz">
-    <label>NOT</label>
-    <input class="inp" id="edit-m-note" placeholder="Daire no, kat...">
-    <div class="modal-row">
-      <button class="mcancel" onclick="closeEditM()">İptal</button>
-      <button class="mok" onclick="saveEditM()">Kaydet</button>
+<div class="ov" id="ov-dagitim">
+  <div class="sh">
+    <div class="sh-head">
+      <div class="sh-title">📋 DAĞITIM SIRASI</div>
+      <button class="sh-x" onclick="closeSheet('dagitim')">✕</button>
     </div>
+    <div id="dag-list"></div>
+    <div id="dag-sum" style="font-family:monospace;font-size:11px;color:#444;line-height:2;margin-top:12px;padding-top:10px;border-top:1px solid #2a2a2a"></div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════
-let bloklar    = [];
-let musteriler = [];
-let orderSeq   = 0;
+// ─── STATE ───────────────────────────────────────
+var bloklar    = [];
+var musteriler = [];
+var seq        = 0;
+var activeBlok = null; // id for blok sheet
+var mcBlokId   = null; // for goto button
+var mode       = 'view';
+var drawPts    = [];
+var pendingPt  = null;
 
-let mode       = 'view'; // view | place | draw
-let drawPts    = [];
-let pendingType= null;   // 'place' | 'draw'
-let pendingPt  = null;   // for place mode
+var sc=1, tx=0, ty=0;
+var imgW=0, imgH=0;
 
-let activeBlokId = null;
-let editMId      = null;
+var COLORS=['#E63329','#3a9fe8','#f5c842','#4caf82','#9b59b6','#e67e22','#1abc9c','#e91e8c'];
+var colorI=0;
 
-let imgW = 0, imgH = 0;
-let scale = 1, ox = 0, oy = 0;
-
-// Pinch / touch state
-let touches = {};
-let lastPinchDist = null;
-let lastTouchMid = null;
-let touchStartTime = 0;
-let touchMoved = false;
-let touchStartX = 0, touchStartY = 0;
-
-const COLORS=['#E63329','#3a9fe8','#f5c842','#4caf82','#9b59b6','#e67e22','#1abc9c','#e91e8c','#00bcd4','#ff9800'];
-let colorSeq = 0;
-
-// ══════════════════════════════════════════════
-// IMAGE LOAD
-// ══════════════════════════════════════════════
-function loadImg(input) {
-  const file = (input.files||[])[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = document.getElementById('plan-img');
-    img.onload = () => {
-      imgW = img.naturalWidth; imgH = img.naturalHeight;
-      img.style.width  = imgW + 'px';
-      img.style.height = imgH + 'px';
-      const sv = document.getElementById('svg-ol');
+// ─── IMAGE ───────────────────────────────────────
+function loadImg(input){
+  var f=(input.files||[])[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    var im=document.getElementById('img');
+    im.onload=function(){
+      imgW=im.naturalWidth; imgH=im.naturalHeight;
+      im.style.width=imgW+'px'; im.style.height=imgH+'px';
+      var sv=document.getElementById('svglay');
       sv.setAttribute('width',imgW); sv.setAttribute('height',imgH);
-      sv.setAttribute('viewBox',`0 0 ${imgW} ${imgH}`);
-      document.getElementById('map-wrap').style.display = 'block';
-      document.getElementById('upload-screen').style.display = 'none';
-      fitMap();
-      renderAll();
+      sv.setAttribute('viewBox','0 0 '+imgW+' '+imgH);
+      document.getElementById('wrap').style.display='block';
+      document.getElementById('upscreen').style.display='none';
+      fit();
     };
-    img.src = e.target.result;
+    im.src=e.target.result;
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(f);
 }
 
-// ══════════════════════════════════════════════
-// ZOOM / PAN (touch + mouse)
-// ══════════════════════════════════════════════
-function applyT() {
-  document.getElementById('map-wrap').style.transform = `translate(${ox}px,${oy}px) scale(${scale})`;
+// ─── ZOOM / PAN ──────────────────────────────────
+function applyT(){document.getElementById('wrap').style.transform='translate('+tx+'px,'+ty+'px) scale('+sc+')'}
+function zoom(f,cx,cy){
+  var mb=document.getElementById('mapbox');
+  cx=cx!=null?cx:mb.clientWidth/2;
+  cy=cy!=null?cy:mb.clientHeight/2;
+  var ns=Math.min(Math.max(sc*f,.1),12);
+  tx=cx-(cx-tx)*(ns/sc); ty=cy-(cy-ty)*(ns/sc);
+  sc=ns; applyT();
 }
-function doZoom(f,cx,cy){
-  const area=document.getElementById('map-area');
-  const ar=area.getBoundingClientRect();
-  cx = cx ?? ar.width/2; cy = cy ?? ar.height/2;
-  const ns=Math.min(Math.max(scale*f,.1),12);
-  ox=cx-(cx-ox)*(ns/scale); oy=cy-(cy-oy)*(ns/scale);
-  scale=ns; applyT();
-}
-function fitMap(){
-  const area=document.getElementById('map-area');
-  const ar=area.getBoundingClientRect();
+function fit(){
+  var mb=document.getElementById('mapbox');
   if(!imgW) return;
-  const sf=Math.min(ar.width/imgW,ar.height/imgH)*.97;
-  scale=sf; ox=(ar.width-imgW*sf)/2; oy=(ar.height-imgH*sf)/2;
+  sc=Math.min(mb.clientWidth/imgW,mb.clientHeight/imgH)*.96;
+  tx=(mb.clientWidth-imgW*sc)/2;
+  ty=(mb.clientHeight-imgH*sc)/2;
   applyT();
 }
 
-// Zoom hold (touch +/-)
-let zoomInt=null;
-function zoomHold(f){zoomInt=setInterval(()=>doZoom(f),50)}
-function zoomStop(){clearInterval(zoomInt)}
+// Touch
+var T={}, pinchD=null, tapT=0, tapX=0, tapY=0, tapMoved=false;
+var panSx,panSy,panTx,panTy;
 
-// Touch events on map-area
-const mapArea = document.getElementById('map-area');
-mapArea.addEventListener('touchstart', onTouchStart, {passive:false});
-mapArea.addEventListener('touchmove',  onTouchMove,  {passive:false});
-mapArea.addEventListener('touchend',   onTouchEnd,   {passive:false});
-mapArea.addEventListener('mousedown',  onMouseDown);
-document.addEventListener('mousemove', onMouseMove);
-document.addEventListener('mouseup',   ()=>{panning=false});
-mapArea.addEventListener('wheel', e=>{ e.preventDefault(); const r=mapArea.getBoundingClientRect(); doZoom(e.deltaY<0?1.1:1/1.1,e.clientX-r.left,e.clientY-r.top); },{passive:false});
-
-let panning=false,panSx,panSy,panOx,panOy;
-function onMouseDown(e){
-  if(mode!=='view') return;
-  if(e.button!==0) return;
-  panning=true; panSx=e.clientX; panSy=e.clientY; panOx=ox; panOy=oy;
-}
-function onMouseMove(e){
-  if(!panning) return;
-  ox=panOx+(e.clientX-panSx); oy=panOy+(e.clientY-panSy); applyT();
-}
-
-function onTouchStart(e){
+var mb=document.getElementById('mapbox');
+mb.addEventListener('touchstart',function(e){
   e.preventDefault();
-  touchStartTime=Date.now(); touchMoved=false;
+  tapT=Date.now(); tapMoved=false;
   if(e.touches.length===1){
-    const t=e.touches[0];
-    touchStartX=t.clientX; touchStartY=t.clientY;
-    panSx=t.clientX; panSy=t.clientY; panOx=ox; panOy=oy;
+    tapX=e.touches[0].clientX; tapY=e.touches[0].clientY;
+    panSx=tapX; panSy=tapY; panTx=tx; panTy=ty;
   } else if(e.touches.length===2){
-    lastPinchDist=pinchDist(e.touches);
-    lastTouchMid=pinchMid(e.touches,mapArea.getBoundingClientRect());
+    pinchD=pdist(e.touches);
   }
-}
-function onTouchMove(e){
-  e.preventDefault();
-  touchMoved=true;
-  if(e.touches.length===1 && mode==='view'){
-    const t=e.touches[0];
-    ox=panOx+(t.clientX-panSx); oy=panOy+(t.clientY-panSy); applyT();
-  } else if(e.touches.length===2){
-    const nd=pinchDist(e.touches);
-    const nm=pinchMid(e.touches,mapArea.getBoundingClientRect());
-    if(lastPinchDist){ doZoom(nd/lastPinchDist,nm.x,nm.y); }
-    lastPinchDist=nd; lastTouchMid=nm;
-  }
-}
-function onTouchEnd(e){
-  e.preventDefault();
-  lastPinchDist=null;
-  // Tap (no significant move, short press)
-  if(!touchMoved && Date.now()-touchStartTime<400){
-    const ar=mapArea.getBoundingClientRect();
-    handleTap(touchStartX-ar.left, touchStartY-ar.top);
-  }
-}
-function pinchDist(ts){return Math.hypot(ts[0].clientX-ts[1].clientX,ts[0].clientY-ts[1].clientY)}
-function pinchMid(ts,ar){return{x:(ts[0].clientX+ts[1].clientX)/2-ar.left,y:(ts[0].clientY+ts[1].clientY)/2-ar.top}}
+},{passive:false});
 
-// Mouse click on map
-mapArea.addEventListener('click', e=>{
-  if(e.target.closest('.blok-pin')) return;
-  handleTap(e.clientX-mapArea.getBoundingClientRect().left, e.clientY-mapArea.getBoundingClientRect().top);
+mb.addEventListener('touchmove',function(e){
+  e.preventDefault();
+  tapMoved=true;
+  if(e.touches.length===1 && mode==='view'){
+    tx=panTx+(e.touches[0].clientX-panSx);
+    ty=panTy+(e.touches[0].clientY-panSy);
+    applyT();
+  } else if(e.touches.length===2){
+    var nd=pdist(e.touches);
+    if(pinchD){
+      var mid=pmid(e.touches);
+      var mbr=mb.getBoundingClientRect();
+      zoom(nd/pinchD,mid.x-mbr.left,mid.y-mbr.top);
+    }
+    pinchD=nd;
+  }
+},{passive:false});
+
+mb.addEventListener('touchend',function(e){
+  e.preventDefault();
+  pinchD=null;
+  if(!tapMoved && Date.now()-tapT<400){
+    var mbr=mb.getBoundingClientRect();
+    handleTap(tapX-mbr.left, tapY-mbr.top);
+  }
+},{passive:false});
+
+// Mouse (desktop)
+var mdown=false,msx,msy,mtx,mty;
+mb.addEventListener('mousedown',function(e){if(mode!=='view'||e.button!==0)return;mdown=true;msx=e.clientX;msy=e.clientY;mtx=tx;mty=ty});
+document.addEventListener('mousemove',function(e){if(!mdown)return;tx=mtx+(e.clientX-msx);ty=mty+(e.clientY-msy);applyT()});
+document.addEventListener('mouseup',function(){mdown=false});
+mb.addEventListener('wheel',function(e){e.preventDefault();var r=mb.getBoundingClientRect();zoom(e.deltaY<0?1.1:1/1.1,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+mb.addEventListener('click',function(e){
+  if(e.target.closest('.pin')) return;
+  var r=mb.getBoundingClientRect();
+  handleTap(e.clientX-r.left,e.clientY-r.top);
 });
 
+function pdist(ts){return Math.hypot(ts[0].clientX-ts[1].clientX,ts[0].clientY-ts[1].clientY)}
+function pmid(ts){return{x:(ts[0].clientX+ts[1].clientX)/2,y:(ts[0].clientY+ts[1].clientY)/2}}
+
+// ─── TAP HANDLER ─────────────────────────────────
 function handleTap(sx,sy){
   if(mode==='place'){
-    // convert screen → image %
-    const xPct=(sx-ox)/scale/imgW*100;
-    const yPct=(sy-oy)/scale/imgH*100;
-    pendingPt={x:xPct,y:yPct};
-    openNameModal('BLOK ADI GİR','');
-    return;
-  }
-  if(mode==='draw'){
-    const xPct=(sx-ox)/scale/imgW*100;
-    const yPct=(sy-oy)/scale/imgH*100;
-    drawPts.push({x:xPct,y:yPct});
-    if(drawPts.length>=3) document.getElementById('draw-bar').querySelector('.dbar-btn').style.display='inline-block';
-    renderDrawSVG();
-    return;
+    pendingPt={x:(sx-tx)/sc/imgW*100, y:(sy-ty)/sc/imgH*100};
+    openNameModal();
+  } else if(mode==='draw'){
+    drawPts.push({x:(sx-tx)/sc/imgW*100, y:(sy-ty)/sc/imgH*100});
+    renderSVG();
   }
 }
 
-// ══════════════════════════════════════════════
-// PLACE MODE (tap to place pin)
-// ══════════════════════════════════════════════
-function startPlaceMode(){
+// ─── PLACE MODE ──────────────────────────────────
+function startPlace(){
   if(!imgW){alert('Önce harita yükleyin');return}
   mode='place';
-  document.getElementById('btn-blok').classList.add('active');
-  document.getElementById('btn-draw').classList.remove('active');
-  showHint('Bloğu yerleştirmek istediğiniz yere dokunun');
+  document.getElementById('tbBlok').classList.add('on');
+  document.getElementById('tbCiz').classList.remove('on');
+  showInfo('Blok yerleştirmek istediğiniz yere dokunun');
 }
 
-function cancelPlace(){
-  mode='view'; pendingPt=null;
-  document.getElementById('btn-blok').classList.remove('active');
-  hideHint();
-}
-
-// ══════════════════════════════════════════════
-// DRAW MODE (freehand polygon)
-// ══════════════════════════════════════════════
-function startDrawMode(){
+// ─── DRAW MODE ───────────────────────────────────
+function startDraw(){
   if(!imgW){alert('Önce harita yükleyin');return}
   mode='draw'; drawPts=[];
-  document.getElementById('btn-draw').classList.add('active');
-  document.getElementById('btn-blok').classList.remove('active');
-  document.getElementById('draw-bar').classList.add('show');
-  renderDrawSVG();
+  document.getElementById('tbCiz').classList.add('on');
+  document.getElementById('tbBlok').classList.remove('on');
+  document.getElementById('dbar').classList.add('on');
 }
-
-function undoPt(){ drawPts.pop(); renderDrawSVG(); }
-
-function closePoly(){
-  if(drawPts.length<3){alert('En az 3 nokta gerekli');return}
-  openNameModal('BLOK ADI GİR (ÇİZİM)','');
+function undoPt(){drawPts.pop();renderSVG()}
+function endDraw(){
+  if(drawPts.length<3){alert('En az 3 nokta ekleyin');return}
+  openNameModal();
 }
-
 function cancelDraw(){
   mode='view'; drawPts=[];
-  document.getElementById('btn-draw').classList.remove('active');
-  document.getElementById('draw-bar').classList.remove('show');
-  renderDrawSVG();
+  document.getElementById('tbCiz').classList.remove('on');
+  document.getElementById('dbar').classList.remove('on');
+  renderSVG();
 }
 
-// ══════════════════════════════════════════════
-// NAME MODAL
-// ══════════════════════════════════════════════
-function loadImg(input) {
-  const file = (input.files||[])[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = document.getElementById('plan-img');
-    img.onload = () => {
-      imgW = img.naturalWidth; imgH = img.naturalHeight;
-      img.style.width  = imgW + 'px';
-      img.style.height = imgH + 'px';
-      const sv = document.getElementById('svg-ol');
-      sv.setAttribute('width',imgW); sv.setAttribute('height',imgH);
-      sv.setAttribute('viewBox',`0 0 ${imgW} ${imgH}`);
-      document.getElementById('map-wrap').style.display = 'block';
-      document.getElementById('upload-screen').style.display = 'none';
-      fitMap();
-      renderAll();
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+// ─── NAME MODAL ──────────────────────────────────
+function openNameModal(){
+  document.getElementById('nameinp').value='';
+  document.getElementById('namemod').classList.add('on');
+  setTimeout(function(){document.getElementById('nameinp').focus()},100);
 }
-
-// ══════════════════════════════════════════════
-// ZOOM / PAN (touch + mouse)
-// ══════════════════════════════════════════════
-function applyT() {
-  document.getElementById('map-wrap').style.transform = `translate(${ox}px,${oy}px) scale(${scale})`;
+function cancelName(){
+  document.getElementById('namemod').classList.remove('on');
+  if(mode==='place'){mode='view';document.getElementById('tbBlok').classList.remove('on')}
+  if(mode==='draw'){drawPts=[];renderSVG()}
 }
-function doZoom(f,cx,cy){
-  const area=document.getElementById('map-area');
-  const ar=area.getBoundingClientRect();
-  cx = cx ?? ar.width/2; cy = cy ?? ar.height/2;
-  const ns=Math.min(Math.max(scale*f,.1),12);
-  ox=cx-(cx-ox)*(ns/scale); oy=cy-(cy-oy)*(ns/scale);
-  scale=ns; applyT();
-}
-function fitMap(){
-  const area=document.getElementById('map-area');
-  const ar=area.getBoundingClientRect();
-  if(!imgW) return;
-  const sf=Math.min(ar.width/imgW,ar.height/imgH)*.97;
-  scale=sf; ox=(ar.width-imgW*sf)/2; oy=(ar.height-imgH*sf)/2;
-  applyT();
-}
-
-// Zoom hold (touch +/-)
-let zoomInt=null;
-function zoomHold(f){zoomInt=setInterval(()=>doZoom(f),50)}
-function zoomStop(){clearInterval(zoomInt)}
-
-// Touch events on map-area
-const mapArea = document.getElementById('map-area');
-mapArea.addEventListener('touchstart', onTouchStart, {passive:false});
-mapArea.addEventListener('touchmove',  onTouchMove,  {passive:false});
-mapArea.addEventListener('touchend',   onTouchEnd,   {passive:false});
-mapArea.addEventListener('mousedown',  onMouseDown);
-document.addEventListener('mousemove', onMouseMove);
-document.addEventListener('mouseup',   ()=>{panning=false});
-mapArea.addEventListener('wheel', e=>{ e.preventDefault(); const r=mapArea.getBoundingClientRect(); doZoom(e.deltaY<0?1.1:1/1.1,e.clientX-r.left,e.clientY-r.top); },{passive:false});
-
-let panning=false,panSx,panSy,panOx,panOy;
-function onMouseDown(e){
-  if(mode!=='view') return;
-  if(e.button!==0) return;
-  panning=true; panSx=e.clientX; panSy=e.clientY; panOx=ox; panOy=oy;
-}
-function onMouseMove(e){
-  if(!panning) return;
-  ox=panOx+(e.clientX-panSx); oy=panOy+(e.clientY-panSy); applyT();
-}
-
-function onTouchStart(e){
-  e.preventDefault();
-  touchStartTime=Date.now(); touchMoved=false;
-  if(e.touches.length===1){
-    const t=e.touches[0];
-    touchStartX=t.clientX; touchStartY=t.clientY;
-    panSx=t.clientX; panSy=t.clientY; panOx=ox; panOy=oy;
-  } else if(e.touches.length===2){
-    lastPinchDist=pinchDist(e.touches);
-    lastTouchMid=pinchMid(e.touches,mapArea.getBoundingClientRect());
-  }
-}
-function onTouchMove(e){
-  e.preventDefault();
-  touchMoved=true;
-  if(e.touches.length===1 && mode==='view'){
-    const t=e.touches[0];
-    ox=panOx+(t.clientX-panSx); oy=panOy+(t.clientY-panSy); applyT();
-  } else if(e.touches.length===2){
-    const nd=pinchDist(e.touches);
-    const nm=pinchMid(e.touches,mapArea.getBoundingClientRect());
-    if(lastPinchDist){ doZoom(nd/lastPinchDist,nm.x,nm.y); }
-    lastPinchDist=nd; lastTouchMid=nm;
-  }
-}
-function onTouchEnd(e){
-  e.preventDefault();
-  lastPinchDist=null;
-  // Tap (no significant move, short press)
-  if(!touchMoved && Date.now()-touchStartTime<400){
-    const ar=mapArea.getBoundingClientRect();
-    handleTap(touchStartX-ar.left, touchStartY-ar.top);
-  }
-}
-function pinchDist(ts){return Math.hypot(ts[0].clientX-ts[1].clientX,ts[0].clientY-ts[1].clientY)}
-function pinchMid(ts,ar){return{x:(ts[0].clientX+ts[1].clientX)/2-ar.left,y:(ts[0].clientY+ts[1].clientY)/2-ar.top}}
-
-// Mouse click on map
-mapArea.addEventListener('click', e=>{
-  if(e.target.closest('.blok-pin')) return;
-  handleTap(e.clientX-mapArea.getBoundingClientRect().left, e.clientY-mapArea.getBoundingClientRect().top);
-});
-
-function handleTap(sx,sy){
-  if(mode==='place'){
-    // convert screen → image %
-    const xPct=(sx-ox)/scale/imgW*100;
-    const yPct=(sy-oy)/scale/imgH*100;
-    pendingPt={x:xPct,y:yPct};
-    openNameModal('BLOK ADI GİR','');
-    return;
-  }
-  if(mode==='draw'){
-    const xPct=(sx-ox)/scale/imgW*100;
-    const yPct=(sy-oy)/scale/imgH*100;
-    drawPts.push({x:xPct,y:yPct});
-    if(drawPts.length>=3) document.getElementById('draw-bar').querySelector('.dbar-btn').style.display='inline-block';
-    renderDrawSVG();
-    return;
-  }
-}
-
-// ══════════════════════════════════════════════
-// PLACE MODE (tap to place pin)
-// ══════════════════════════════════════════════
-function startPlaceMode(){
-  if(!imgW){alert('Önce harita yükleyin');return}
-  mode='place';
-  document.getElementById('btn-blok').classList.add('active');
-  document.getElementById('btn-draw').classList.remove('active');
-  showHint('Bloğu yerleştirmek istediğiniz yere dokunun');
-}
-
-function cancelPlace(){
-  mode='view'; pendingPt=null;
-  document.getElementById('btn-blok').classList.remove('active');
-  hideHint();
-}
-
-// ══════════════════════════════════════════════
-// DRAW MODE (freehand polygon)
-// ══════════════════════════════════════════════
-function startDrawMode(){
-  if(!imgW){alert('Önce harita yükleyin');return}
-  mode='draw'; drawPts=[];
-  document.getElementById('btn-draw').classList.add('active');
-  document.getElementById('btn-blok').classList.remove('active');
-  document.getElementById('draw-bar').classList.add('show');
-  renderDrawSVG();
-}
-
-function undoPt(){ drawPts.pop(); renderDrawSVG(); }
-
-function closePoly(){
-  if(drawPts.length<3){alert('En az 3 nokta gerekli');return}
-  openNameModal('BLOK ADI GİR (ÇİZİM)','');
-}
-
-function cancelDraw(){
-  mode='view'; drawPts=[];
-  document.getElementById('btn-draw').classList.remove('active');
-  document.getElementById('draw-bar').classList.remove('show');
-  renderDrawSVG();
-}
-
-// ══════════════════════════════════════════════
-// NAME MODAL
-// ══════════════════════════════════════════════
-function openNameModal(title, val){
-  document.getElementById('name-modal-title').textContent=title;
-  document.getElementById('name-inp').value=val;
-  document.getElementById('name-modal').classList.add('show');
-  setTimeout(()=>document.getElementById('name-inp').focus(),100);
-}
-document.getElementById('name-inp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName()});
-
-function confirmName(){
-  const name=document.getElementById('name-inp').value.trim();
-  if(!name) return;
-  document.getElementById('name-inp').value='';
-  document.getElementById('name-modal').classList.remove('show');
-
-  const color=COLORS[colorSeq%COLORS.length]; colorSeq++;
-
+function saveName(){
+  var n=document.getElementById('nameinp').value.trim().toUpperCase();
+  if(!n) return;
+  document.getElementById('namemod').classList.remove('on');
+  var color=COLORS[colorI%COLORS.length]; colorI++;
+  var id=uid();
   if(mode==='place' && pendingPt){
-    bloklar.push({id:uid(),name,color,cx:pendingPt.x,cy:pendingPt.y,points:[]});
-    cancelPlace();
+    bloklar.push({id:id,name:n,color:color,cx:pendingPt.x,cy:pendingPt.y,pts:[]});
+    mode='view'; document.getElementById('tbBlok').classList.remove('on'); pendingPt=null;
   } else if(mode==='draw' && drawPts.length>=3){
-    const cx=drawPts.reduce((s,p)=>s+p.x,0)/drawPts.length;
-    const cy=drawPts.reduce((s,p)=>s+p.y,0)/drawPts.length;
-    bloklar.push({id:uid(),name,color,cx,cy,points:[...drawPts]});
+    var cx=drawPts.reduce(function(s,p){return s+p.x},0)/drawPts.length;
+    var cy=drawPts.reduce(function(s,p){return s+p.y},0)/drawPts.length;
+    bloklar.push({id:id,name:n,color:color,cx:cx,cy:cy,pts:drawPts.slice()});
     cancelDraw();
   }
   renderAll();
 }
 
-function cancelName(){
-  document.getElementById('name-modal').classList.remove('show');
-  if(mode==='place') cancelPlace();
-  if(mode==='draw') { drawPts=[]; renderDrawSVG(); }
+// ─── SHEETS ──────────────────────────────────────
+function openSheet(name){
+  // close others
+  document.querySelectorAll('.ov').forEach(function(o){o.classList.remove('on')});
+  var ov=document.getElementById('ov-'+name);
+  if(!ov) return;
+  ov.classList.add('on');
+  if(name==='musteri'){renderMiList(); setTimeout(function(){document.getElementById('mi-adi').focus()},200)}
+  if(name==='dagitim'){renderDag()}
+}
+function closeSheet(name){
+  var ov=document.getElementById('ov-'+name);
+  if(ov) ov.classList.remove('on');
 }
 
-// ══════════════════════════════════════════════
-// BLOK POPUP
-// ══════════════════════════════════════════════
+// Close on overlay click
+document.querySelectorAll('.ov').forEach(function(o){
+  o.addEventListener('click',function(e){
+    if(e.target===o) o.classList.remove('on');
+  });
+});
+
+// ─── MÜŞTERİ SHEET ───────────────────────────────
+function blokSuggest(){
+  var q=document.getElementById('mi-blok').value.toUpperCase().trim();
+  var sd=document.getElementById('sug');
+  if(!q){sd.style.display='none';return}
+  var hits=bloklar.filter(function(b){return b.name.toUpperCase().indexOf(q)>=0});
+  if(!hits.length){sd.style.display='none';return}
+  sd.innerHTML=hits.map(function(b){
+    return '<div class="sug-row" onclick="pickBlok(\''+b.id+'\')"><div class="sug-dot" style="background:'+b.color+'"></div>'+esc(b.name)+'</div>'
+  }).join('');
+  sd.style.display='block';
+}
+function pickBlok(id){
+  var b=bloklar.find(function(x){return x.id===id});
+  document.getElementById('mi-blok').value=b.name;
+  document.getElementById('sug').style.display='none';
+  document.getElementById('mi-blok')._picked=id;
+}
+
+function miEkle(){
+  var adi=document.getElementById('mi-adi').value.trim().toUpperCase();
+  var blokQ=document.getElementById('mi-blok').value.trim().toUpperCase();
+  var not=document.getElementById('mi-not').value.trim().toUpperCase();
+  if(!adi){alert('Ad soyad girin');document.getElementById('mi-adi').focus();return}
+  // find blok
+  var blokId=document.getElementById('mi-blok')._picked;
+  if(!blokId && blokQ){
+    var hit=bloklar.find(function(b){return b.name.toUpperCase()===blokQ})
+         ||bloklar.find(function(b){return b.name.toUpperCase().indexOf(blokQ)>=0});
+    if(hit) blokId=hit.id;
+  }
+  if(!blokId){alert('Blok bulunamadı.\nÖnce haritaya blok ekleyin, sonra buradan seçin.');document.getElementById('mi-blok').focus();return}
+  seq++;
+  musteriler.push({id:uid(),blokId:blokId,adi:adi,not:not,order:seq});
+  // show card
+  var b=bloklar.find(function(x){return x.id===blokId});
+  mcBlokId=blokId;
+  document.getElementById('mc-blok').textContent=b.name;
+  document.getElementById('mc-blok').style.color=b.color;
+  document.getElementById('mc-adi').textContent=adi;
+  document.getElementById('mc-meta').textContent=not||'Not eklenmedi';
+  document.getElementById('mcard').style.display='block';
+  document.getElementById('mcard').style.borderLeftColor=b.color;
+  // clear form
+  document.getElementById('mi-adi').value='';
+  document.getElementById('mi-blok').value='';
+  document.getElementById('mi-not').value='';
+  document.getElementById('mi-blok')._picked=null;
+  document.getElementById('sug').style.display='none';
+  document.getElementById('mi-adi').focus();
+  // go to map
+  closeSheet('musteri');
+  litPin(blokId);
+  panTo(blokId);
+  renderAll();
+}
+function mcGoto(){
+  if(!mcBlokId) return;
+  closeSheet('musteri');
+  litPin(mcBlokId);
+  panTo(mcBlokId);
+}
+
+function miFilter(q){
+  var uq=q.toUpperCase();
+  var list=musteriler.filter(function(m){
+    var b=bloklar.find(function(x){return x.id===m.blokId});
+    return !uq || m.adi.indexOf(uq)>=0 || (b&&b.name.indexOf(uq)>=0);
+  }).sort(function(a,b){return a.order-b.order});
+  renderMiList(list);
+}
+function renderMiList(list){
+  list=list||musteriler.slice().sort(function(a,b){return a.order-b.order});
+  var el=document.getElementById('mi-list');
+  if(!list.length){el.innerHTML='<div class="empty">Kayıt yok</div>';return}
+  el.innerHTML=list.map(function(m,i){
+    var b=bloklar.find(function(x){return x.id===m.blokId});
+    return '<div class="mrow">'+
+      '<div class="mrow-num">'+(i+1)+'.</div>'+
+      '<div class="mrow-info" onclick="showOnMap(\''+m.id+'\')" style="cursor:pointer">'+
+        '<div class="mrow-name">'+esc(m.adi)+'</div>'+
+        '<div class="mrow-sub">'+(b?'<span style="color:'+b.color+'">●</span> '+esc(b.name):'—')+(m.not?' · '+esc(m.not):'')+'</div>'+
+      '</div>'+
+      '<button class="mrow-del" onclick="delM(\''+m.id+'\',true)">✕</button>'+
+    '</div>';
+  }).join('');
+}
+
+function showOnMap(id){
+  var m=musteriler.find(function(x){return x.id===id});
+  if(!m) return;
+  var b=bloklar.find(function(x){return x.id===m.blokId});
+  if(!b) return;
+  mcBlokId=b.id;
+  document.getElementById('mc-blok').textContent=b.name;
+  document.getElementById('mc-blok').style.color=b.color;
+  document.getElementById('mc-adi').textContent=m.adi;
+  document.getElementById('mc-meta').textContent=m.not||'';
+  document.getElementById('mcard').style.display='block';
+  document.getElementById('mcard').style.borderLeftColor=b.color;
+  closeSheet('musteri');
+  litPin(b.id);
+  panTo(b.id);
+}
+
+function delM(id, confirm_del){
+  if(confirm_del && !confirm('Müşteriyi silmek istiyor musunuz?')) return;
+  musteriler=musteriler.filter(function(m){return m.id!==id});
+  renderAll();
+  renderMiList();
+  renderDag();
+}
+
+// ─── BLOK SHEET ──────────────────────────────────
 function openBlokSheet(id){
-  activeBlokId=id;
-  const b=bloklar.find(x=>x.id===id);
-  document.getElementById('bs-dot').style.background=b.color;
+  activeBlok=id;
+  var b=bloklar.find(function(x){return x.id===id});
   document.getElementById('bs-title').textContent=b.name;
-  renderBlokSheet();
-  document.getElementById('blok-overlay').classList.add('show');
-  setTimeout(()=>document.getElementById('new-m-name').focus(),200);
+  document.getElementById('bs-title').style.color=b.color;
+  renderBslist();
+  document.querySelectorAll('.ov').forEach(function(o){o.classList.remove('on')});
+  document.getElementById('ov-blok').classList.add('on');
+  setTimeout(function(){document.getElementById('bs-minp').focus()},200);
 }
-function closeBlokSheet(){
-  document.getElementById('blok-overlay').classList.remove('show');
-  activeBlokId=null;
+function renderBslist(){
+  var ms=musteriler.filter(function(m){return m.blokId===activeBlok}).sort(function(a,b){return a.order-b.order});
+  var el=document.getElementById('bs-list');
+  if(!ms.length){el.innerHTML='<div class="empty">Müşteri yok — aşağıdan ekleyin</div>';return}
+  el.innerHTML=ms.map(function(m,i){
+    return '<div class="mrow">'+
+      '<div class="mrow-num">'+(i+1)+'.</div>'+
+      '<div class="mrow-info"><div class="mrow-name">'+esc(m.adi)+'</div>'+(m.not?'<div class="mrow-sub">'+esc(m.not)+'</div>':'')+'</div>'+
+      '<button class="mrow-teslim" onclick="teslim(\''+m.id+'\')">TESLİM</button>'+
+      '<button class="mrow-del" onclick="delM(\''+m.id+'\',false)">✕</button>'+
+    '</div>';
+  }).join('');
 }
-function renderBlokSheet(){
-  const ms=musteriler.filter(m=>m.blokId===activeBlokId).sort((a,b)=>a.order-b.order);
-  const el=document.getElementById('bs-list');
-  if(!ms.length){el.innerHTML='<div style="font-size:12px;color:#333;padding:8px 0;font-family:monospace">Henüz müşteri eklenmedi</div>';return}
-  el.innerHTML=ms.map((m,i)=>`
-    <div class="m-row">
-      <div class="m-num">${i+1}.</div>
-      <div class="m-info">
-        <div class="m-name">${esc(m.adi)}</div>
-        ${m.not?`<div class="m-note">${esc(m.not)}</div>`:''}
-      </div>
-      <button class="m-teslim ${m.teslim?'done':''}" onclick="toggleTeslimSheet('${m.id}')">${m.teslim?'✓':'TESLİM'}</button>
-      <button class="m-act" onclick="openEditM('${m.id}')">✏</button>
-      <button class="m-act" style="color:#E63329" onclick="delMusteri('${m.id}')">✕</button>
-    </div>`).join('');
+function bsAddM(){
+  var adi=document.getElementById('bs-minp').value.trim().toUpperCase();
+  var not=document.getElementById('bs-mnot').value.trim().toUpperCase();
+  if(!adi||!activeBlok) return;
+  seq++;
+  musteriler.push({id:uid(),blokId:activeBlok,adi:adi,not:not,order:seq});
+  document.getElementById('bs-minp').value='';
+  document.getElementById('bs-mnot').value='';
+  document.getElementById('bs-minp').focus();
+  renderBslist(); renderPins(); updateStat();
+}
+function teslim(id){
+  var m=musteriler.find(function(x){return x.id===id});
+  if(!m) return;
+  if(confirm('"'+m.adi+'" teslim edildi ve listeden silinecek. Onayla?')){
+    musteriler=musteriler.filter(function(x){return x.id!==id});
+    renderBslist(); renderPins(); updateStat();
+  }
 }
 function editBlokName(){
-  const b=bloklar.find(x=>x.id===activeBlokId);
-  const n=prompt('Yeni blok adı:',b.name);
-  if(n&&n.trim()){b.name=n.trim();document.getElementById('bs-title').textContent=b.name;renderAll();}
+  var b=bloklar.find(function(x){return x.id===activeBlok});
+  var n=prompt('Yeni blok adı:',b.name);
+  if(n&&n.trim()){b.name=n.trim().toUpperCase();renderAll();document.getElementById('bs-title').textContent=b.name}
 }
-function deleteBlok(){
-  if(!confirm('Bu bloğu ve müşterileri sil?')) return;
-  bloklar=bloklar.filter(b=>b.id!==activeBlokId);
-  musteriler=musteriler.filter(m=>m.blokId!==activeBlokId);
-  closeBlokSheet(); renderAll();
+function delBlok(){
+  if(!confirm('Bloğu ve tüm müşterileri sil?')) return;
+  bloklar=bloklar.filter(function(b){return b.id!==activeBlok});
+  musteriler=musteriler.filter(function(m){return m.blokId!==activeBlok});
+  closeSheet('blok'); renderAll();
 }
 
-// ══════════════════════════════════════════════
-// MÜŞTERİ
-// ══════════════════════════════════════════════
-function addMusteri(){
-  const adi=document.getElementById('new-m-name').value.trim();
-  const not=document.getElementById('new-m-note').value.trim();
-  if(!adi||!activeBlokId) return;
-  orderSeq++;
-  musteriler.push({id:uid(),blokId:activeBlokId,adi,not,teslim:false,order:orderSeq});
-  document.getElementById('new-m-name').value='';
-  document.getElementById('new-m-note').value='';
-  document.getElementById('new-m-name').focus();
-  renderBlokSheet(); renderBadges(); updateStat();
-}
-function toggleTeslimSheet(id){
-  const m=musteriler.find(x=>x.id===id);
-  if(m) m.teslim=!m.teslim;
-  renderBlokSheet(); renderBadges(); updateStat();
-}
-function delMusteri(id){
-  musteriler=musteriler.filter(m=>m.id!==id);
-  renderBlokSheet(); renderBadges(); updateStat();
-}
-function openEditM(id){
-  editMId=id;
-  const m=musteriler.find(x=>x.id===id);
-  document.getElementById('edit-m-name').value=m.adi;
-  document.getElementById('edit-m-note').value=m.not||'';
-  document.getElementById('edit-m-modal').classList.add('show');
-  setTimeout(()=>document.getElementById('edit-m-name').focus(),100);
-}
-function closeEditM(){document.getElementById('edit-m-modal').classList.remove('show');editMId=null}
-function saveEditM(){
-  const m=musteriler.find(x=>x.id===editMId);
-  if(m){
-    m.adi=document.getElementById('edit-m-name').value.trim()||m.adi;
-    m.not=document.getElementById('edit-m-note').value.trim();
-  }
-  closeEditM(); renderBlokSheet(); renderBadges(); updateStat();
-}
-document.getElementById('edit-m-name').addEventListener('keydown',e=>{if(e.key==='Enter')saveEditM()});
-
-// ══════════════════════════════════════════════
-// DAĞITIM
-// ══════════════════════════════════════════════
-function openDagitim(){
-  renderDagitim();
-  document.getElementById('dag-overlay').classList.add('show');
-}
-function closeDagitim(){document.getElementById('dag-overlay').classList.remove('show')}
-function renderDagitim(){
-  const sorted=[...musteriler].sort((a,b)=>a.order-b.order);
-  const el=document.getElementById('dag-list');
-  if(!sorted.length){el.innerHTML='<div style="font-size:12px;color:#333;padding:12px;text-align:center;font-family:monospace">Henüz müşteri yok</div>';return}
-  let idx=0;
-  el.innerHTML=sorted.map(m=>{
-    const b=bloklar.find(x=>x.id===m.blokId);
-    const lbl=m.teslim?'✓ TESLİM':`${++idx}. GİDECEK`;
-    return`<div class="dp-item ${m.teslim?'done-item':''}">
-      <div class="dp-ord">${lbl}</div>
-      <div class="dp-name">${esc(m.adi)}</div>
-      <div class="dp-blok">${b?`<span style="color:${b.color}">●</span> ${esc(b.name)}`:'—'}${m.not?` · ${esc(m.not)}`:''}</div>
-      <div class="dp-acts">
-        <button class="dp-mv" onclick="mvOrder('${m.id}',-1)">↑</button>
-        <button class="dp-mv" onclick="mvOrder('${m.id}',1)">↓</button>
-        <button class="dp-teslim ${m.teslim?'done':''}" onclick="toggleTeslimDp('${m.id}')">
-          ${m.teslim?'✓ TESLİM EDİLDİ':'📦 TESLİM ET'}
-        </button>
-      </div>
-    </div>`;
+// ─── DAĞITIM ─────────────────────────────────────
+function renderDag(){
+  var list=musteriler.slice().sort(function(a,b){return a.order-b.order});
+  var el=document.getElementById('dag-list');
+  if(!list.length){el.innerHTML='<div class="empty">Müşteri yok</div>';return}
+  var idx=0;
+  el.innerHTML=list.map(function(m){
+    idx++;
+    var b=bloklar.find(function(x){return x.id===m.blokId});
+    return '<div class="drow">'+
+      '<div class="drow-ord">'+idx+'. GİDECEK</div>'+
+      '<div class="drow-name">'+esc(m.adi)+'</div>'+
+      '<div class="drow-blok">'+(b?'<span style="color:'+b.color+'">●</span> '+esc(b.name):'—')+(m.not?' · '+esc(m.not):'')+'</div>'+
+      '<div class="drow-acts">'+
+        '<button class="drow-mv" onclick="mvOrd(\''+m.id+'\',-1)">↑</button>'+
+        '<button class="drow-mv" onclick="mvOrd(\''+m.id+'\',1)">↓</button>'+
+        '<button class="drow-teslim" onclick="dagTeslim(\''+m.id+'\')">📦 TESLİM ET</button>'+
+      '</div>'+
+    '</div>';
   }).join('');
-  const total=musteriler.length, teslim=musteriler.filter(m=>m.teslim).length;
-  document.getElementById('dag-summary').innerHTML=
-    `Toplam: ${total} &nbsp;·&nbsp; <span style="color:#4caf82">Teslim: ${teslim}</span> &nbsp;·&nbsp; <span style="color:#f5c842">Bekleyen: ${total-teslim}</span>`;
+  document.getElementById('dag-sum').innerHTML='Toplam: '+list.length;
 }
-function mvOrder(id,dir){
-  const sorted=[...musteriler].sort((a,b)=>a.order-b.order);
-  const i=sorted.findIndex(m=>m.id===id),j=i+dir;
-  if(j<0||j>=sorted.length) return;
-  [sorted[i].order,sorted[j].order]=[sorted[j].order,sorted[i].order];
-  renderDagitim();
+function mvOrd(id,dir){
+  var list=musteriler.slice().sort(function(a,b){return a.order-b.order});
+  var i=list.findIndex(function(m){return m.id===id}), j=i+dir;
+  if(j<0||j>=list.length) return;
+  var tmp=list[i].order; list[i].order=list[j].order; list[j].order=tmp;
+  renderDag();
 }
-function toggleTeslimDp(id){
-  const m=musteriler.find(x=>x.id===id);
-  if(m) m.teslim=!m.teslim;
-  renderDagitim(); renderBadges(); updateStat();
+function dagTeslim(id){
+  var m=musteriler.find(function(x){return x.id===id});
+  if(!m) return;
+  if(confirm('"'+m.adi+'" teslim edildi ve listeden silinecek. Onayla?')){
+    musteriler=musteriler.filter(function(x){return x.id!==id});
+    renderDag(); renderPins(); updateStat();
+  }
 }
 
-// ══════════════════════════════════════════════
-// RENDER
-// ══════════════════════════════════════════════
-function renderAll(){ renderSVG(); renderBadges(); updateStat(); }
+// ─── RENDER ──────────────────────────────────────
+function renderAll(){renderSVG();renderPins();updateStat()}
 
 function renderSVG(){
-  const svg=document.getElementById('svg-ol');
-  let html='';
-  bloklar.forEach(b=>{
-    if(!b.points||b.points.length<3) return;
-    const pts=b.points.map(p=>`${p.x/100*imgW},${p.y/100*imgH}`).join(' ');
-    html+=`<polygon points="${pts}" fill="${b.color}22" stroke="${b.color}" stroke-width="2.5" stroke-dasharray="7,4"/>`;
+  var sv=document.getElementById('svglay');
+  var h='';
+  bloklar.forEach(function(b){
+    if(!b.pts||b.pts.length<3) return;
+    var pts=b.pts.map(function(p){return (p.x/100*imgW)+','+(p.y/100*imgH)}).join(' ');
+    h+='<polygon points="'+pts+'" fill="'+b.color+'20" stroke="'+b.color+'" stroke-width="2.5" stroke-dasharray="7,4"/>';
   });
-  renderDrawSVG(html);
-}
-
-function renderDrawSVG(base=''){
-  const svg=document.getElementById('svg-ol');
-  let html=base||svg.innerHTML.replace(/<(circle|polyline|line)[^>]*>/g,''); // keep polygons
   if(mode==='draw'&&drawPts.length>0){
-    const color=COLORS[colorSeq%COLORS.length];
+    var col=COLORS[colorI%COLORS.length];
     if(drawPts.length>=2){
-      const pts=drawPts.map(p=>`${p.x/100*imgW},${p.y/100*imgH}`).join(' ');
-      html+=`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="6,3"/>`;
+      var pts=drawPts.map(function(p){return (p.x/100*imgW)+','+(p.y/100*imgH)}).join(' ');
+      h+='<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="3" stroke-dasharray="6,3"/>';
     }
-    drawPts.forEach((p,i)=>{
-      const cx=p.x/100*imgW,cy=p.y/100*imgH;
-      html+=`<circle cx="${cx}" cy="${cy}" r="${i===0?9:5}" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+    drawPts.forEach(function(p,i){
+      var cx=p.x/100*imgW,cy=p.y/100*imgH;
+      h+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(i===0?9:5)+'" fill="'+col+'" stroke="#fff" stroke-width="2"/>';
     });
     if(drawPts.length>=3){
-      const f=drawPts[0],l=drawPts[drawPts.length-1];
-      html+=`<line x1="${l.x/100*imgW}" y1="${l.y/100*imgH}" x2="${f.x/100*imgW}" y2="${f.y/100*imgH}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,4" opacity=".5"/>`;
+      var f=drawPts[0],l=drawPts[drawPts.length-1];
+      h+='<line x1="'+(l.x/100*imgW)+'" y1="'+(l.y/100*imgH)+'" x2="'+(f.x/100*imgW)+'" y2="'+(f.y/100*imgH)+'" stroke="'+col+'" stroke-width="1.5" stroke-dasharray="4,4" opacity=".5"/>';
     }
   }
-  svg.innerHTML=html;
+  sv.innerHTML=h;
 }
 
-function renderBadges(){
-  document.querySelectorAll('.blok-pin').forEach(e=>e.remove());
-  const wrap=document.getElementById('map-wrap');
-  bloklar.forEach(b=>{
-    const count=musteriler.filter(m=>m.blokId===b.id).length;
-    const teslim=musteriler.filter(m=>m.blokId===b.id&&m.teslim).length;
-    const size=Math.max(48,44+count*2);
-    const div=document.createElement('div');
-    div.className='blok-pin';
-    div.style.left=b.cx+'%';
-    div.style.top=b.cy+'%';
-    div.innerHTML=`
-      <div class="pin-circle" style="background:${b.color};width:${size}px;height:${size}px;font-size:${count>9?9:10}px">
-        ${esc(b.name)}
-      </div>
-      <div class="pin-count" style="border-color:${b.color}">${count?`${count} kişi${teslim?` · ${teslim}✓`:''}`:count===0?'boş':''}</div>
-    `;
-    div.addEventListener('click',e=>{e.stopPropagation();openBlokSheet(b.id)});
-    div.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();openBlokSheet(b.id)});
-    wrap.appendChild(div);
+function renderPins(){
+  document.querySelectorAll('.pin').forEach(function(p){p.remove()});
+  var wrap=document.getElementById('wrap');
+  bloklar.forEach(function(b){
+    var cnt=musteriler.filter(function(m){return m.blokId===b.id}).length;
+    var sz=Math.max(50,48+cnt*2);
+    var d=document.createElement('div');
+    d.className='pin';
+    d.style.left=b.cx+'%'; d.style.top=b.cy+'%';
+    d.innerHTML='<div class="pin-c" style="background:'+b.color+';width:'+sz+'px;height:'+sz+'px;font-size:'+(cnt>9?9:11)+'px">'+esc(b.name)+'</div>'+
+      '<div class="pin-n" style="border-color:'+b.color+'">'+(cnt?cnt+' kişi':'boş')+'</div>';
+    d.addEventListener('click',function(e){e.stopPropagation();openBlokSheet(b.id)});
+    d.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();openBlokSheet(b.id)});
+    wrap.appendChild(d);
   });
 }
 
 function updateStat(){
-  const t=musteriler.length,tl=musteriler.filter(m=>m.teslim).length;
-  document.getElementById('tb-stat').textContent=`${t} müşteri · ${tl} teslim`;
+  document.getElementById('stat').textContent=musteriler.length+' kişi';
 }
 
-// ══════════════════════════════════════════════
-// HINT BAR
-// ══════════════════════════════════════════════
-let hintTimeout;
-function showHint(txt){
-  let bar=document.getElementById('hint-bar');
-  if(!bar){bar=document.createElement('div');bar.id='hint-bar';bar.style.cssText='position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #f5c842;padding:8px 16px;font-size:11px;font-family:monospace;color:#f5c842;border-radius:4px;z-index:60;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.5)';document.body.appendChild(bar)}
-  bar.textContent=txt; bar.style.display='block';
-  clearTimeout(hintTimeout); hintTimeout=setTimeout(hideHint,3000);
+// ─── PIN HIGHLIGHT & PAN ─────────────────────────
+var litId=null,litTimer=null;
+function litPin(blokId){
+  clearTimeout(litTimer);
+  document.querySelectorAll('.pin').forEach(function(p){p.classList.remove('lit')});
+  var b=bloklar.find(function(x){return x.id===blokId}); if(!b) return;
+  document.querySelectorAll('.pin').forEach(function(p){
+    if(Math.abs(parseFloat(p.style.left)-b.cx)<0.5 && Math.abs(parseFloat(p.style.top)-b.cy)<0.5)
+      p.classList.add('lit');
+  });
+  litTimer=setTimeout(function(){document.querySelectorAll('.pin').forEach(function(p){p.classList.remove('lit')})},4000);
 }
-function hideHint(){const b=document.getElementById('hint-bar');if(b)b.style.display='none'}
+function panTo(blokId){
+  var b=bloklar.find(function(x){return x.id===blokId}); if(!b) return;
+  var mb=document.getElementById('mapbox');
+  tx=mb.clientWidth/2 - b.cx/100*imgW*sc;
+  ty=mb.clientHeight/2 - b.cy/100*imgH*sc;
+  applyT();
+}
 
-// ══════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════
+// ─── INFO TOAST ──────────────────────────────────
+var infoTimer;
+function showInfo(txt){
+  var el=document.getElementById('infotoast');
+  if(!el){el=document.createElement('div');el.id='infotoast';el.style.cssText='position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #f5c842;color:#f5c842;font-size:11px;font-family:monospace;padding:8px 16px;border-radius:4px;z-index:20;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.5)';document.body.appendChild(el)}
+  el.textContent=txt;el.style.display='block';
+  clearTimeout(infoTimer);infoTimer=setTimeout(function(){el.style.display='none'},3000);
+}
+
+// ─── UTILS ───────────────────────────────────────
 function uid(){return Math.random().toString(36).slice(2,9)}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-document.getElementById('plan-img').addEventListener('load',()=>setTimeout(renderAll,50));
+document.getElementById('img').addEventListener('load',function(){setTimeout(renderAll,50)});
 </script>
 </body>
 </html>
