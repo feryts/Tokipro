@@ -2,185 +2,186 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>TOKİ Dağıtım</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#111;color:#e8e8e8;font-family:'Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#111;color:#e8e8e8;font-family:'Segoe UI',system-ui,sans-serif;touch-action:none}
 
-/* ── TOOLBAR ── */
-#toolbar{
+/* ── TOP BAR ── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:50px;
   background:#1a1a1a;border-bottom:2px solid #E63329;
-  padding:0 14px;height:48px;display:flex;align-items:center;gap:8px;
-  flex-shrink:0;z-index:20;
+  display:flex;align-items:center;gap:0;z-index:100;
+  overflow-x:auto;overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
 }
-.badge{background:#E63329;color:#fff;font-weight:900;font-size:14px;letter-spacing:3px;padding:3px 10px;flex-shrink:0}
-.tb-sep{width:1px;height:24px;background:#2a2a2a;margin:0 2px}
+#topbar::-webkit-scrollbar{display:none}
+.badge{background:#E63329;color:#fff;font-weight:900;font-size:13px;letter-spacing:2px;padding:0 10px;height:100%;display:flex;align-items:center;flex-shrink:0}
 .tb-btn{
-  padding:5px 12px;font-size:11px;font-weight:700;letter-spacing:1px;
-  border:1px solid #2a2a2a;background:transparent;color:#888;
-  cursor:pointer;transition:all .2s;white-space:nowrap;height:32px;
+  height:100%;padding:0 12px;font-size:11px;font-weight:700;letter-spacing:.5px;
+  border:none;border-left:1px solid #2a2a2a;background:transparent;color:#888;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
   display:flex;align-items:center;gap:5px;
+  transition:background .15s,color .15s;
 }
-.tb-btn:hover{border-color:#aaa;color:#e8e8e8}
-.tb-btn.active{background:#E63329;border-color:#E63329;color:#fff}
-.tb-btn.green{background:#2a7a4a;border-color:#2a7a4a;color:#fff}
-#tb-info{margin-left:auto;font-size:11px;color:#444;font-family:monospace;white-space:nowrap}
+.tb-btn:hover,.tb-btn:active{background:#2a2a2a;color:#e8e8e8}
+.tb-btn.active{background:#E63329;color:#fff}
+.tb-btn.green{background:#2a7a4a;color:#fff}
+#tb-stat{margin-left:auto;padding:0 12px;font-size:10px;color:#444;font-family:monospace;white-space:nowrap;flex-shrink:0}
 
-/* ── MAP AREA ── */
-#map-area{flex:1;position:relative;overflow:hidden;background:#0a0a0a;cursor:default}
-#map-ph{
+/* ── MAP ── */
+#map-area{
+  position:fixed;top:50px;left:0;right:0;bottom:0;
+  overflow:hidden;background:#0a0a0a;
+}
+
+/* Upload screen */
+#upload-screen{
   position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:12px;
-  border:3px dashed #2a2a2a;cursor:pointer;transition:all .2s;
+  align-items:center;justify-content:center;gap:16px;z-index:5;
 }
-#map-ph:hover{border-color:#E63329}
-#map-ph input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-#map-ph .ph-icon{font-size:60px;opacity:.2}
-#map-ph p{color:#444;font-size:14px}
-#map-ph small{color:#333;font-size:11px}
+#upload-btn{
+  background:#E63329;color:#fff;border:none;
+  font-size:15px;font-weight:700;padding:16px 32px;
+  border-radius:4px;cursor:pointer;letter-spacing:1px;
+}
+#upload-btn input{display:none}
+.up-icon{font-size:64px;opacity:.25}
+#upload-screen p{color:#444;font-size:13px}
 
-#map-wrap{position:absolute;transform-origin:0 0;display:none}
-#plan-img{display:block;user-select:none;pointer-events:none}
+/* Map transform wrapper */
+#map-wrap{
+  position:absolute;top:0;left:0;
+  transform-origin:0 0;
+  touch-action:none;
+}
+#plan-img{display:block;user-select:none;pointer-events:none;max-width:none}
+#svg-ol{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
+#svg-ol.draw-mode{pointer-events:all;cursor:crosshair}
 
-/* SVG overlay */
-#svg-ol{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
-#svg-ol.can-draw{pointer-events:all;cursor:crosshair}
-
-/* Block badge on map */
-.blok-badge{
+/* ── BLOCK PINS ── */
+.blok-pin{
   position:absolute;transform:translate(-50%,-50%);
   display:flex;flex-direction:column;align-items:center;
-  cursor:pointer;user-select:none;z-index:5;
+  cursor:pointer;z-index:10;
+  transition:transform .15s;
 }
-.blok-badge .bb-circle{
-  width:48px;height:48px;border-radius:50%;
-  background:#E63329;border:3px solid #fff;
+.blok-pin:active{transform:translate(-50%,-50%) scale(.92)}
+.pin-circle{
+  border-radius:50%;background:#E63329;border:3px solid #fff;
   display:flex;align-items:center;justify-content:center;
-  font-weight:900;font-size:11px;color:#fff;text-align:center;
+  color:#fff;font-weight:900;font-size:10px;text-align:center;
   line-height:1.1;padding:4px;
-  box-shadow:0 3px 14px rgba(230,51,41,.5);
-  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 16px rgba(230,51,41,.55);
+  min-width:48px;min-height:48px;
 }
-.blok-badge:hover .bb-circle{transform:scale(1.12);box-shadow:0 6px 20px rgba(230,51,41,.7)}
-.blok-badge .bb-count{
+.pin-count{
   margin-top:3px;background:#0f0f0f;color:#e8e8e8;
-  font-size:10px;font-family:monospace;padding:2px 7px;
+  font-size:9px;font-family:monospace;padding:2px 6px;
   border:1px solid #E63329;white-space:nowrap;
 }
 
-/* ── ZOOM BUTTONS ── */
-#zoom-wrap{position:absolute;bottom:16px;right:16px;display:flex;flex-direction:column;gap:4px;z-index:10}
-.zbtn{
-  width:38px;height:38px;background:#1a1a1a;border:1px solid #2a2a2a;
-  color:#e8e8e8;font-size:18px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .15s;border-radius:2px;
+/* ── ZOOM BTNS ── */
+#zoom-btns{
+  position:fixed;bottom:16px;right:12px;
+  display:flex;flex-direction:column;gap:4px;z-index:50;
 }
-.zbtn:hover{background:#E63329}
+.zbtn{
+  width:42px;height:42px;background:#1a1a1a;border:1px solid #333;
+  color:#e8e8e8;font-size:20px;cursor:pointer;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.4);
+  -webkit-user-select:none;user-select:none;
+}
+.zbtn:active{background:#E63329}
 
-/* ── DRAW HINT BAR ── */
+/* ── DRAW BAR ── */
 #draw-bar{
-  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
   background:#1a1a1a;border:1px solid #f5c842;
-  padding:7px 16px;font-size:11px;font-family:monospace;color:#f5c842;
-  display:none;align-items:center;gap:10px;z-index:15;white-space:nowrap;
+  padding:8px 14px;font-size:11px;font-family:monospace;color:#f5c842;
+  display:none;align-items:center;gap:10px;z-index:60;
+  white-space:nowrap;border-radius:4px;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
 }
 #draw-bar.show{display:flex}
-#draw-bar button{padding:3px 10px;border:1px solid #E63329;background:transparent;color:#E63329;font-size:10px;cursor:pointer}
+.dbar-btn{padding:5px 10px;border:1px solid currentColor;background:transparent;font-size:11px;cursor:pointer;border-radius:2px;font-family:monospace}
 
-/* ── POPUPS ── */
-.popup{
-  position:fixed;background:#1a1a1a;border:1px solid #2a2a2a;border-top:2px solid #E63329;
-  padding:20px;z-index:50;min-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.6);
-  display:none;
+/* ── MODALS / SHEETS ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;
+  display:none;align-items:flex-end;justify-content:center;
 }
-.popup.show{display:block}
-.popup h3{font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:14px;color:#e8e8e8}
-.popup label{font-size:10px;color:#555;font-family:monospace;display:block;margin-bottom:4px}
-.popup input,.popup select,.popup textarea{
+.overlay.show{display:flex}
+.sheet{
+  background:#1a1a1a;border-radius:14px 14px 0 0;
+  border-top:2px solid #E63329;padding:20px 16px;
+  width:100%;max-height:90vh;overflow-y:auto;
+}
+.sheet h3{font-size:14px;font-weight:700;letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sheet-close{margin-left:auto;background:transparent;border:none;color:#555;font-size:22px;cursor:pointer;line-height:1;padding:0}
+
+/* Center modal (name input) */
+.center-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.center-modal.show{display:flex}
+.cmodal{
+  background:#1a1a1a;border-top:2px solid #E63329;
+  padding:20px;width:100%;max-width:360px;border-radius:4px;
+}
+.cmodal h3{font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:14px}
+.cmodal label{font-size:10px;color:#555;font-family:monospace;display:block;margin-bottom:4px}
+.inp{
   width:100%;background:#111;border:1px solid #2a2a2a;color:#e8e8e8;
-  font-family:'Segoe UI',sans-serif;font-size:13px;padding:8px 10px;
-  outline:none;margin-bottom:10px;
+  font-size:14px;padding:10px 12px;outline:none;border-radius:2px;margin-bottom:10px;
 }
-.popup input:focus,.popup select:focus{border-color:#E63329}
-.popup-btns{display:flex;gap:6px;margin-top:4px}
-.popup-btns button{flex:1;padding:8px;font-weight:700;font-size:12px;border:none;cursor:pointer}
-.btn-ok{background:#E63329;color:#fff}
-.btn-ok:hover{background:#c8241b}
-.btn-cancel{background:#2a2a2a;color:#888}
-.btn-cancel:hover{background:#333;color:#e8e8e8}
-.btn-del{background:#2a2a2a;color:#E63329;border:1px solid #E63329!important;border:none}
+.inp:focus{border-color:#E63329}
+.modal-row{display:flex;gap:8px}
+.modal-row button{flex:1;padding:10px;font-weight:700;font-size:13px;border:none;cursor:pointer;border-radius:2px}
+.mok{background:#E63329;color:#fff}
+.mcancel{background:#2a2a2a;color:#888}
+.mdel{background:transparent;border:1px solid #E63329!important;color:#E63329;flex:0 0 auto;padding:10px 14px}
 
-/* ── BLOK POPUP (customer list) ── */
-#blok-popup{min-width:320px;max-width:380px}
-.bp-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.bp-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
-.bp-title{font-size:15px;font-weight:700;flex:1}
-.bp-close{background:transparent;border:none;color:#555;font-size:18px;cursor:pointer;line-height:1}
-.bp-close:hover{color:#e8e8e8}
-.musteri-row{
+/* Müşteri listesi */
+.m-row{
   display:flex;align-items:center;gap:8px;
-  padding:8px 0;border-bottom:1px solid #1e1e1e;
+  padding:10px 0;border-bottom:1px solid #1e1e1e;
 }
-.musteri-row:last-child{border-bottom:none}
-.m-order{font-size:10px;color:#444;font-family:monospace;width:20px;flex-shrink:0}
-.m-info{flex:1}
+.m-row:last-child{border:none}
+.m-num{font-size:10px;color:#444;font-family:monospace;width:18px;flex-shrink:0}
+.m-info{flex:1;min-width:0}
 .m-name{font-size:13px;font-weight:600}
 .m-note{font-size:10px;color:#555;font-family:monospace}
 .m-teslim{
-  padding:3px 9px;font-size:10px;font-weight:700;
+  padding:5px 10px;font-size:10px;font-weight:700;
   border:1px solid #2a2a2a;background:transparent;color:#666;
-  cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;
+  cursor:pointer;border-radius:2px;white-space:nowrap;
+  transition:all .2s;flex-shrink:0;
 }
-.m-teslim:hover{border-color:#4caf82;color:#4caf82}
 .m-teslim.done{background:#4caf82;border-color:#4caf82;color:#fff}
-.m-edit,.m-del{
-  width:22px;height:22px;background:transparent;border:1px solid #2a2a2a;
-  color:#555;font-size:11px;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;transition:all .2s;flex-shrink:0;
-}
-.m-edit:hover{border-color:#aaa;color:#e8e8e8}
-.m-del:hover{border-color:#E63329;color:#E63329}
-.add-m-row{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid #2a2a2a}
-.add-m-row input{flex:1;background:#111;border:1px solid #2a2a2a;color:#e8e8e8;font-size:12px;padding:7px 10px;outline:none}
-.add-m-row input:focus{border-color:#E63329}
-.add-m-row button{padding:7px 12px;background:#E63329;border:none;color:#fff;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}
-.add-m-row button:hover{background:#c8241b}
+.m-act{width:30px;height:30px;background:transparent;border:1px solid #2a2a2a;color:#555;font-size:13px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.m-act:active{background:#2a2a2a}
 
-/* ── DAGITIM PANEL ── */
-#dagitim-panel{
-  position:absolute;top:0;right:0;bottom:0;width:300px;
-  background:#1a1a1a;border-left:1px solid #2a2a2a;
-  display:none;flex-direction:column;z-index:15;
-}
-#dagitim-panel.show{display:flex}
-#dp-header{padding:14px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:8px}
-#dp-header h3{font-size:13px;font-weight:700;letter-spacing:1px;flex:1}
-#dp-close{background:transparent;border:none;color:#555;font-size:18px;cursor:pointer}
-#dp-close:hover{color:#e8e8e8}
-#dp-body{flex:1;overflow-y:auto;padding:10px}
-.dp-item{
-  background:#111;border:1px solid #2a2a2a;
-  padding:10px 12px;margin-bottom:6px;
-}
-.dp-item.teslim{border-left:3px solid #4caf82;opacity:.65}
-.dp-order{font-size:10px;color:#555;font-family:monospace;margin-bottom:4px}
+.add-row{display:flex;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #2a2a2a}
+.add-row .inp{margin:0;font-size:13px}
+.add-row button{padding:10px 14px;background:#E63329;border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;border-radius:2px;white-space:nowrap}
+
+/* Dagitim sheet */
+.dp-item{background:#111;border:1px solid #2a2a2a;border-radius:3px;padding:10px 12px;margin-bottom:6px}
+.dp-item.done-item{border-left:3px solid #4caf82;opacity:.6}
+.dp-ord{font-size:10px;color:#555;font-family:monospace;margin-bottom:2px}
 .dp-name{font-size:13px;font-weight:700}
-.dp-blok{font-size:10px;color:#555;font-family:monospace;margin-top:2px;margin-bottom:8px}
-.dp-actions{display:flex;gap:4px}
-.dp-up,.dp-dn{
-  width:26px;height:26px;background:transparent;border:1px solid #2a2a2a;
-  color:#666;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-}
-.dp-up:hover,.dp-dn:hover{border-color:#aaa;color:#e8e8e8}
-.dp-teslim{
-  flex:1;padding:6px;font-size:11px;font-weight:700;
-  border:1px solid #2a2a2a;background:transparent;color:#666;cursor:pointer;
-}
-.dp-teslim:hover{border-color:#4caf82;color:#4caf82}
+.dp-blok{font-size:10px;color:#555;font-family:monospace;margin-bottom:8px}
+.dp-acts{display:flex;gap:4px}
+.dp-mv{width:32px;height:32px;background:transparent;border:1px solid #2a2a2a;color:#666;font-size:14px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center}
+.dp-mv:active{background:#2a2a2a}
+.dp-teslim{flex:1;padding:8px;font-size:11px;font-weight:700;border:1px solid #2a2a2a;background:transparent;color:#666;cursor:pointer;border-radius:2px}
 .dp-teslim.done{background:#4caf82;border-color:#4caf82;color:#fff}
-#dp-footer{padding:12px;border-top:1px solid #2a2a2a;font-family:monospace;font-size:11px;color:#444;line-height:2}
+.dp-summary{font-family:monospace;font-size:11px;color:#444;line-height:2;margin-top:12px;padding-top:10px;border-top:1px solid #2a2a2a}
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#2a2a2a}
@@ -188,504 +189,577 @@ body{background:#111;color:#e8e8e8;font-family:'Segoe UI',system-ui,sans-serif;h
 </head>
 <body>
 
-<!-- TOOLBAR -->
-<div id="toolbar">
+<!-- TOP BAR -->
+<div id="topbar">
   <div class="badge">TOKİ</div>
-  <div class="tb-sep"></div>
-  <label class="tb-btn" style="cursor:pointer">
-    🗺 HARİTA YÜKLE
+  <label class="tb-btn">
+    🗺 HARİTA
     <input type="file" accept="image/*" style="display:none" onchange="loadImg(this)">
   </label>
-  <div class="tb-sep"></div>
-  <button class="tb-btn" id="btn-draw" onclick="startDraw()">✏ BLOK ÇİZ</button>
-  <button class="tb-btn" id="btn-dagitim" onclick="toggleDagitim()">📋 DAĞITIM</button>
-  <div id="tb-info">— kayıt</div>
+  <button class="tb-btn" id="btn-blok" onclick="startPlaceMode()">📍 BLOK EKLE</button>
+  <button class="tb-btn" id="btn-draw" onclick="startDrawMode()">✏ ÇİZ</button>
+  <button class="tb-btn" id="btn-dagitim" onclick="openDagitim()">📋 DAĞITIM</button>
+  <div id="tb-stat">0 müşteri</div>
 </div>
 
 <!-- MAP AREA -->
 <div id="map-area">
-  <!-- Placeholder / upload zone -->
-  <div id="map-ph">
-    <input type="file" accept="image/*" onchange="loadImg(this)">
-    <div class="ph-icon">🏗️</div>
-    <p>Harita yüklemek için tıklayın veya sürükleyin</p>
-    <small>PNG, JPG desteklenir</small>
+  <div id="upload-screen">
+    <div class="up-icon">🏗️</div>
+    <p>Vaziyet planını yükleyin</p>
+    <label id="upload-btn">
+      📂 HARİTA YÜKLE
+      <input type="file" accept="image/*" onchange="loadImg(this)">
+    </label>
+    <p style="font-size:11px;color:#333">PNG, JPG desteklenir</p>
   </div>
 
-  <!-- Map + SVG -->
   <div id="map-wrap">
     <img id="plan-img" src="" alt="plan" draggable="false">
     <svg id="svg-ol"></svg>
-    <!-- blok badges + markers injected here -->
-  </div>
-
-  <!-- Draw hint -->
-  <div id="draw-bar">
-    <span id="draw-txt">Haritada tıklayarak blok sınırını çizin</span>
-    <button onclick="undoPoint()">↩ Geri</button>
-    <button onclick="closePoly()" id="btn-close-poly" style="border-color:#4caf82;color:#4caf82">✓ Kapat</button>
-    <button onclick="cancelDraw()">✕ İptal</button>
-  </div>
-
-  <!-- Zoom -->
-  <div id="zoom-wrap">
-    <button class="zbtn" onclick="doZoom(1.25)">＋</button>
-    <button class="zbtn" onclick="doZoom(0.8)">－</button>
-    <button class="zbtn" onclick="resetZoom()" title="Sıfırla">↺</button>
-    <button class="zbtn" onclick="fitMap()" title="Sığdır">⊡</button>
+    <!-- pins injected here -->
   </div>
 </div>
 
-<!-- BLOK INFO POPUP (customer list) -->
-<div class="popup" id="blok-popup">
-  <div class="bp-header">
-    <div class="bp-dot" id="bp-dot"></div>
-    <div class="bp-title" id="bp-title">Blok</div>
-    <button class="bp-close" onclick="closeBlokPopup()">✕</button>
-  </div>
-  <div id="bp-musteri-list"></div>
-  <div class="add-m-row">
-    <input type="text" id="new-m-input" placeholder="Müşteri adı ekle…" onkeydown="if(event.key==='Enter')addMusteri()">
-    <input type="text" id="new-m-note" placeholder="Not" style="width:80px">
-    <button onclick="addMusteri()">+ EKLE</button>
+<!-- ZOOM -->
+<div id="zoom-btns">
+  <button class="zbtn" id="zin" ontouchstart="zoomHold(1.06)" ontouchend="zoomStop()" onclick="doZoom(1.25)">＋</button>
+  <button class="zbtn" id="zout" ontouchstart="zoomHold(1/1.06)" ontouchend="zoomStop()" onclick="doZoom(.8)">－</button>
+  <button class="zbtn" onclick="fitMap()">⊡</button>
+</div>
+
+<!-- DRAW BAR -->
+<div id="draw-bar">
+  <span id="draw-txt" style="color:#f5c842">Parmağınızla blok sınırını çizin</span>
+  <button class="dbar-btn" style="color:#4caf82;border-color:#4caf82" onclick="closePoly()">✓ BİTİR</button>
+  <button class="dbar-btn" style="color:#aaa;border-color:#444" onclick="undoPt()">↩</button>
+  <button class="dbar-btn" style="color:#E63329;border-color:#E63329" onclick="cancelDraw()">✕</button>
+</div>
+
+<!-- BLOK NAME MODAL -->
+<div class="center-modal" id="name-modal">
+  <div class="cmodal">
+    <h3 id="name-modal-title">BLOK ADI</h3>
+    <label>AD / NUMARA</label>
+    <input class="inp" id="name-inp" placeholder="örn. 1. Blok, A Blok, 2. Etap">
+    <div class="modal-row">
+      <button class="mcancel" onclick="cancelName()">İptal</button>
+      <button class="mok" onclick="confirmName()">Kaydet</button>
+    </div>
   </div>
 </div>
 
-<!-- BLOK NAME POPUP -->
-<div class="popup" id="name-popup" style="top:50%;left:50%;transform:translate(-50%,-50%)">
-  <h3>BLOK ADI GİR</h3>
-  <label>BLOK ADI</label>
-  <input type="text" id="name-input" placeholder="örn. A Blok, 1. Blok">
-  <div class="popup-btns">
-    <button class="btn-cancel" onclick="cancelDraw()">İptal</button>
-    <button class="btn-ok" onclick="confirmBlokName()">Kaydet</button>
+<!-- BLOK POPUP (müşteri listesi) -->
+<div class="overlay" id="blok-overlay" onclick="if(event.target===this)closeBlokSheet()">
+  <div class="sheet" id="blok-sheet">
+    <h3>
+      <span id="bs-dot" style="width:12px;height:12px;border-radius:50%;background:#E63329;display:inline-block"></span>
+      <span id="bs-title">Blok</span>
+      <button class="sheet-close" onclick="closeBlokSheet()">✕</button>
+    </h3>
+    <!-- edit/delete blok -->
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button style="flex:1;padding:7px;background:transparent;border:1px solid #2a2a2a;color:#888;font-size:11px;cursor:pointer;border-radius:2px" onclick="editBlokName()">⚙ Blok Adını Düzenle</button>
+      <button style="padding:7px 12px;background:transparent;border:1px solid #E63329;color:#E63329;font-size:11px;cursor:pointer;border-radius:2px" onclick="deleteBlok()">✕ Sil</button>
+    </div>
+    <div id="bs-list"></div>
+    <div class="add-row">
+      <input class="inp" id="new-m-name" placeholder="Müşteri adı…" onkeydown="if(event.key==='Enter')addMusteri()">
+      <input class="inp" id="new-m-note" placeholder="Not" style="width:80px">
+      <button onclick="addMusteri()">+ EKLE</button>
+    </div>
   </div>
 </div>
 
-<!-- DAGITIM PANEL -->
-<div id="dagitim-panel">
-  <div id="dp-header">
-    <h3>📋 DAĞITIM SIRASI</h3>
-    <button id="dp-close" onclick="toggleDagitim()">✕</button>
+<!-- DAĞITIM SHEET -->
+<div class="overlay" id="dag-overlay" onclick="if(event.target===this)closeDagitim()">
+  <div class="sheet">
+    <h3>
+      📋 DAĞITIM SIRASI
+      <button class="sheet-close" onclick="closeDagitim()">✕</button>
+    </h3>
+    <div id="dag-list"></div>
+    <div class="dp-summary" id="dag-summary"></div>
   </div>
-  <div id="dp-body"></div>
-  <div id="dp-footer" id="dp-footer"></div>
+</div>
+
+<!-- EDIT MUSTERI MODAL -->
+<div class="center-modal" id="edit-m-modal">
+  <div class="cmodal">
+    <h3>MÜŞTERİ DÜZENLE</h3>
+    <label>AD SOYAD</label>
+    <input class="inp" id="edit-m-name" placeholder="Ahmet Yılmaz">
+    <label>NOT</label>
+    <input class="inp" id="edit-m-note" placeholder="Daire no, kat...">
+    <div class="modal-row">
+      <button class="mcancel" onclick="closeEditM()">İptal</button>
+      <button class="mok" onclick="saveEditM()">Kaydet</button>
+    </div>
+  </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════════
-let bloklar    = [];   // {id,name,color,cx%,cy%,points:[{x%,y%}]}
-let musteriler = [];   // {id,blokId,adi,not,teslim,order}
+// ══════════════════════════════════════════════
+let bloklar    = [];
+let musteriler = [];
 let orderSeq   = 0;
 
-let mode = 'view';
-let drawPts = [];
+let mode       = 'view'; // view | place | draw
+let drawPts    = [];
+let pendingType= null;   // 'place' | 'draw'
+let pendingPt  = null;   // for place mode
 
+let activeBlokId = null;
+let editMId      = null;
+
+let imgW = 0, imgH = 0;
 let scale = 1, ox = 0, oy = 0;
-let panning = false, panSx, panSy, panOx, panOy;
 
-let activeBlokId = null; // for blok popup
-let pendingPolyPts = []; // temp during draw
+// Pinch / touch state
+let touches = {};
+let lastPinchDist = null;
+let lastTouchMid = null;
+let touchStartTime = 0;
+let touchMoved = false;
+let touchStartX = 0, touchStartY = 0;
 
-const COLORS = ['#E63329','#3a9fe8','#f5c842','#4caf82','#9b59b6',
-                '#e67e22','#1abc9c','#e91e8c','#00bcd4','#ff9800'];
+const COLORS=['#E63329','#3a9fe8','#f5c842','#4caf82','#9b59b6','#e67e22','#1abc9c','#e91e8c','#00bcd4','#ff9800'];
 let colorSeq = 0;
 
-// ════════════════════════════════════════════════════
-// IMAGE
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// IMAGE LOAD
+// ══════════════════════════════════════════════
 function loadImg(input) {
-  const file = (input.files||input.dataTransfer?.files||[])[0];
-  if (!file) return;
+  const file = (input.files||[])[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = e => {
     const img = document.getElementById('plan-img');
-    img.onload = () => { fitMap(); renderAll(); };
+    img.onload = () => {
+      imgW = img.naturalWidth; imgH = img.naturalHeight;
+      img.style.width  = imgW + 'px';
+      img.style.height = imgH + 'px';
+      const sv = document.getElementById('svg-ol');
+      sv.setAttribute('width',imgW); sv.setAttribute('height',imgH);
+      sv.setAttribute('viewBox',`0 0 ${imgW} ${imgH}`);
+      document.getElementById('map-wrap').style.display = 'block';
+      document.getElementById('upload-screen').style.display = 'none';
+      fitMap();
+      renderAll();
+    };
     img.src = e.target.result;
-    document.getElementById('map-wrap').style.display = 'block';
-    document.getElementById('map-ph').style.display = 'none';
   };
   reader.readAsDataURL(file);
 }
 
-// drag-drop on map area
-const ma = document.getElementById('map-area');
-ma.addEventListener('dragover', e => e.preventDefault());
-ma.addEventListener('drop', e => { e.preventDefault(); loadImg(e); });
-
-// ════════════════════════════════════════════════════
-// ZOOM / PAN
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// ZOOM / PAN (touch + mouse)
+// ══════════════════════════════════════════════
 function applyT() {
   document.getElementById('map-wrap').style.transform = `translate(${ox}px,${oy}px) scale(${scale})`;
 }
-function doZoom(f, cx, cy) {
-  const area = document.getElementById('map-area').getBoundingClientRect();
-  cx = cx ?? area.width/2; cy = cy ?? area.height/2;
-  const ns = Math.min(Math.max(scale*f, .1), 10);
-  ox = cx - (cx - ox) * (ns/scale);
-  oy = cy - (cy - oy) * (ns/scale);
-  scale = ns; applyT();
+function doZoom(f,cx,cy){
+  const area=document.getElementById('map-area');
+  const ar=area.getBoundingClientRect();
+  cx = cx ?? ar.width/2; cy = cy ?? ar.height/2;
+  const ns=Math.min(Math.max(scale*f,.1),12);
+  ox=cx-(cx-ox)*(ns/scale); oy=cy-(cy-oy)*(ns/scale);
+  scale=ns; applyT();
 }
-function resetZoom() { scale=1; ox=0; oy=0; applyT(); }
-function fitMap() {
-  const img = document.getElementById('plan-img');
-  const area = document.getElementById('map-area').getBoundingClientRect();
-  if (!img.naturalWidth) return;
-  const sf = Math.min(area.width/img.naturalWidth, area.height/img.naturalHeight) * .95;
-  scale = sf;
-  ox = (area.width  - img.naturalWidth  * sf) / 2;
-  oy = (area.height - img.naturalHeight * sf) / 2;
+function fitMap(){
+  const area=document.getElementById('map-area');
+  const ar=area.getBoundingClientRect();
+  if(!imgW) return;
+  const sf=Math.min(ar.width/imgW,ar.height/imgH)*.97;
+  scale=sf; ox=(ar.width-imgW*sf)/2; oy=(ar.height-imgH*sf)/2;
   applyT();
 }
 
-// Pan
-ma.addEventListener('mousedown', e => {
-  if (mode === 'draw') return;
-  if (e.button !== 0) return;
-  panning = true; panSx = e.clientX; panSy = e.clientY; panOx = ox; panOy = oy;
-  ma.style.cursor = 'grabbing';
-});
-document.addEventListener('mousemove', e => {
-  if (!panning) return;
-  ox = panOx + (e.clientX - panSx);
-  oy = panOy + (e.clientY - panSy);
-  applyT();
-});
-document.addEventListener('mouseup', () => { panning = false; ma.style.cursor = 'default'; });
-ma.addEventListener('wheel', e => {
+// Zoom hold (touch +/-)
+let zoomInt=null;
+function zoomHold(f){zoomInt=setInterval(()=>doZoom(f),50)}
+function zoomStop(){clearInterval(zoomInt)}
+
+// Touch events on map-area
+const mapArea = document.getElementById('map-area');
+mapArea.addEventListener('touchstart', onTouchStart, {passive:false});
+mapArea.addEventListener('touchmove',  onTouchMove,  {passive:false});
+mapArea.addEventListener('touchend',   onTouchEnd,   {passive:false});
+mapArea.addEventListener('mousedown',  onMouseDown);
+document.addEventListener('mousemove', onMouseMove);
+document.addEventListener('mouseup',   ()=>{panning=false});
+mapArea.addEventListener('wheel', e=>{ e.preventDefault(); const r=mapArea.getBoundingClientRect(); doZoom(e.deltaY<0?1.1:1/1.1,e.clientX-r.left,e.clientY-r.top); },{passive:false});
+
+let panning=false,panSx,panSy,panOx,panOy;
+function onMouseDown(e){
+  if(mode!=='view') return;
+  if(e.button!==0) return;
+  panning=true; panSx=e.clientX; panSy=e.clientY; panOx=ox; panOy=oy;
+}
+function onMouseMove(e){
+  if(!panning) return;
+  ox=panOx+(e.clientX-panSx); oy=panOy+(e.clientY-panSy); applyT();
+}
+
+function onTouchStart(e){
   e.preventDefault();
-  doZoom(e.deltaY < 0 ? 1.1 : 1/1.1, e.clientX - ma.getBoundingClientRect().left, e.clientY - ma.getBoundingClientRect().top);
-}, {passive:false});
-
-// ════════════════════════════════════════════════════
-// DRAW
-// ════════════════════════════════════════════════════
-function startDraw() {
-  if (!document.getElementById('plan-img').src || document.getElementById('plan-img').src === location.href) {
-    alert('Önce harita yükleyin.'); return;
+  touchStartTime=Date.now(); touchMoved=false;
+  if(e.touches.length===1){
+    const t=e.touches[0];
+    touchStartX=t.clientX; touchStartY=t.clientY;
+    panSx=t.clientX; panSy=t.clientY; panOx=ox; panOy=oy;
+  } else if(e.touches.length===2){
+    lastPinchDist=pinchDist(e.touches);
+    lastTouchMid=pinchMid(e.touches,mapArea.getBoundingClientRect());
   }
-  mode = 'draw'; drawPts = [];
-  document.getElementById('svg-ol').classList.add('can-draw');
-  document.getElementById('draw-bar').classList.add('show');
-  document.getElementById('btn-draw').classList.add('active');
-  document.getElementById('btn-close-poly').style.display = 'none';
-  updateDrawSVG();
 }
-
-function cancelDraw() {
-  mode = 'view'; drawPts = [];
-  document.getElementById('svg-ol').classList.remove('can-draw');
-  document.getElementById('draw-bar').classList.remove('show');
-  document.getElementById('btn-draw').classList.remove('active');
-  document.getElementById('name-popup').classList.remove('show');
-  renderSVG();
+function onTouchMove(e){
+  e.preventDefault();
+  touchMoved=true;
+  if(e.touches.length===1 && mode==='view'){
+    const t=e.touches[0];
+    ox=panOx+(t.clientX-panSx); oy=panOy+(t.clientY-panSy); applyT();
+  } else if(e.touches.length===2){
+    const nd=pinchDist(e.touches);
+    const nm=pinchMid(e.touches,mapArea.getBoundingClientRect());
+    if(lastPinchDist){ doZoom(nd/lastPinchDist,nm.x,nm.y); }
+    lastPinchDist=nd; lastTouchMid=nm;
+  }
 }
-
-function undoPoint() {
-  drawPts.pop(); updateDrawSVG();
+function onTouchEnd(e){
+  e.preventDefault();
+  lastPinchDist=null;
+  // Tap (no significant move, short press)
+  if(!touchMoved && Date.now()-touchStartTime<400){
+    const ar=mapArea.getBoundingClientRect();
+    handleTap(touchStartX-ar.left, touchStartY-ar.top);
+  }
 }
+function pinchDist(ts){return Math.hypot(ts[0].clientX-ts[1].clientX,ts[0].clientY-ts[1].clientY)}
+function pinchMid(ts,ar){return{x:(ts[0].clientX+ts[1].clientX)/2-ar.left,y:(ts[0].clientY+ts[1].clientY)/2-ar.top}}
 
-function closePoly() {
-  if (drawPts.length < 3) { alert('En az 3 nokta gerekli.'); return; }
-  // Show name popup
-  document.getElementById('name-popup').classList.add('show');
-  setTimeout(() => document.getElementById('name-input').focus(), 50);
-}
-
-document.getElementById('name-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') confirmBlokName();
+// Mouse click on map
+mapArea.addEventListener('click', e=>{
+  if(e.target.closest('.blok-pin')) return;
+  handleTap(e.clientX-mapArea.getBoundingClientRect().left, e.clientY-mapArea.getBoundingClientRect().top);
 });
 
-function confirmBlokName() {
-  const name = document.getElementById('name-input').value.trim();
-  if (!name) { document.getElementById('name-input').focus(); return; }
-  document.getElementById('name-input').value = '';
-  document.getElementById('name-popup').classList.remove('show');
+function handleTap(sx,sy){
+  if(mode==='place'){
+    // convert screen → image %
+    const xPct=(sx-ox)/scale/imgW*100;
+    const yPct=(sy-oy)/scale/imgH*100;
+    pendingPt={x:xPct,y:yPct};
+    openNameModal('BLOK ADI GİR','');
+    return;
+  }
+  if(mode==='draw'){
+    const xPct=(sx-ox)/scale/imgW*100;
+    const yPct=(sy-oy)/scale/imgH*100;
+    drawPts.push({x:xPct,y:yPct});
+    if(drawPts.length>=3) document.getElementById('draw-bar').querySelector('.dbar-btn').style.display='inline-block';
+    renderDrawSVG();
+    return;
+  }
+}
 
-  const color = COLORS[colorSeq % COLORS.length];
-  colorSeq++;
+// ══════════════════════════════════════════════
+// PLACE MODE (tap to place pin)
+// ══════════════════════════════════════════════
+function startPlaceMode(){
+  if(!imgW){alert('Önce harita yükleyin');return}
+  mode='place';
+  document.getElementById('btn-blok').classList.add('active');
+  document.getElementById('btn-draw').classList.remove('active');
+  showHint('Bloğu yerleştirmek istediğiniz yere dokunun');
+}
 
-  // centroid
-  const cx = drawPts.reduce((s,p)=>s+p.x,0)/drawPts.length;
-  const cy = drawPts.reduce((s,p)=>s+p.y,0)/drawPts.length;
+function cancelPlace(){
+  mode='view'; pendingPt=null;
+  document.getElementById('btn-blok').classList.remove('active');
+  hideHint();
+}
 
-  const blok = { id:uid(), name, color, cx, cy, points:[...drawPts] };
-  bloklar.push(blok);
-  cancelDraw();
+// ══════════════════════════════════════════════
+// DRAW MODE (freehand polygon)
+// ══════════════════════════════════════════════
+function startDrawMode(){
+  if(!imgW){alert('Önce harita yükleyin');return}
+  mode='draw'; drawPts=[];
+  document.getElementById('btn-draw').classList.add('active');
+  document.getElementById('btn-blok').classList.remove('active');
+  document.getElementById('draw-bar').classList.add('show');
+  renderDrawSVG();
+}
+
+function undoPt(){ drawPts.pop(); renderDrawSVG(); }
+
+function closePoly(){
+  if(drawPts.length<3){alert('En az 3 nokta gerekli');return}
+  openNameModal('BLOK ADI GİR (ÇİZİM)','');
+}
+
+function cancelDraw(){
+  mode='view'; drawPts=[];
+  document.getElementById('btn-draw').classList.remove('active');
+  document.getElementById('draw-bar').classList.remove('show');
+  renderDrawSVG();
+}
+
+// ══════════════════════════════════════════════
+// NAME MODAL
+// ══════════════════════════════════════════════
+function openNameModal(title, val){
+  document.getElementById('name-modal-title').textContent=title;
+  document.getElementById('name-inp').value=val;
+  document.getElementById('name-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('name-inp').focus(),100);
+}
+document.getElementById('name-inp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName()});
+
+function confirmName(){
+  const name=document.getElementById('name-inp').value.trim();
+  if(!name) return;
+  document.getElementById('name-inp').value='';
+  document.getElementById('name-modal').classList.remove('show');
+
+  const color=COLORS[colorSeq%COLORS.length]; colorSeq++;
+
+  if(mode==='place' && pendingPt){
+    bloklar.push({id:uid(),name,color,cx:pendingPt.x,cy:pendingPt.y,points:[]});
+    cancelPlace();
+  } else if(mode==='draw' && drawPts.length>=3){
+    const cx=drawPts.reduce((s,p)=>s+p.x,0)/drawPts.length;
+    const cy=drawPts.reduce((s,p)=>s+p.y,0)/drawPts.length;
+    bloklar.push({id:uid(),name,color,cx,cy,points:[...drawPts]});
+    cancelDraw();
+  }
   renderAll();
 }
 
-// SVG click during draw
-document.getElementById('svg-ol').addEventListener('click', e => {
-  if (mode !== 'draw') return;
-  const img = document.getElementById('plan-img');
-  const rect = img.getBoundingClientRect();
-  const x = (e.clientX - rect.left) / (img.offsetWidth)  * 100;
-  const y = (e.clientY - rect.top)  / (img.offsetHeight) * 100;
-  drawPts.push({x, y});
-  document.getElementById('btn-close-poly').style.display = drawPts.length >= 3 ? 'inline-block':'none';
-  updateDrawSVG();
-});
-
-function updateDrawSVG() {
-  renderSVG(); // re-render includes draw preview
+function cancelName(){
+  document.getElementById('name-modal').classList.remove('show');
+  if(mode==='place') cancelPlace();
+  if(mode==='draw') { drawPts=[]; renderDrawSVG(); }
 }
 
-// ════════════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════════════
-function renderAll() {
-  renderSVG();
-  renderBadges();
-  renderDagitim();
-  updateInfo();
-}
-
-function imgDims() {
-  const img = document.getElementById('plan-img');
-  return { w: img.offsetWidth || img.naturalWidth || 800,
-           h: img.offsetHeight || img.naturalHeight || 600 };
-}
-
-function pct2px(p) {
-  const {w,h} = imgDims();
-  return { x: p.x/100*w, y: p.y/100*h };
-}
-
-function renderSVG() {
-  const svg = document.getElementById('svg-ol');
-  const {w,h} = imgDims();
-  svg.setAttribute('width', w); svg.setAttribute('height', h);
-  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-
-  let html = '';
-
-  // Finished blok polygons
-  bloklar.forEach(b => {
-    if (!b.points || b.points.length < 3) return;
-    const pts = b.points.map(p=>{ const q=pct2px(p); return `${q.x},${q.y}`; }).join(' ');
-    html += `<polygon points="${pts}" fill="${b.color}20" stroke="${b.color}" stroke-width="2" stroke-dasharray="6,3"/>`;
-  });
-
-  // Draw preview
-  if (mode === 'draw' && drawPts.length > 0) {
-    const color = COLORS[colorSeq % COLORS.length];
-    if (drawPts.length >= 2) {
-      const pts = drawPts.map(p=>{ const q=pct2px(p); return `${q.x},${q.y}`; }).join(' ');
-      html += `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-dasharray="6,3"/>`;
-    }
-    drawPts.forEach((p,i) => {
-      const q = pct2px(p);
-      html += `<circle cx="${q.x}" cy="${q.y}" r="${i===0?8:5}" fill="${color}" stroke="#fff" stroke-width="2"/>`;
-      if (i===0) html += `<circle cx="${q.x}" cy="${q.y}" r="14" fill="none" stroke="${color}" stroke-width="1.5" stroke-dasharray="3,2" opacity=".7"/>`;
-    });
-    // Close line preview if ≥3 pts
-    if (drawPts.length >= 3) {
-      const f=pct2px(drawPts[0]), l=pct2px(drawPts[drawPts.length-1]);
-      html += `<line x1="${l.x}" y1="${l.y}" x2="${f.x}" y2="${f.y}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,4" opacity=".5"/>`;
-    }
-  }
-
-  svg.innerHTML = html;
-}
-
-function renderBadges() {
-  // Remove old badges
-  document.querySelectorAll('.blok-badge').forEach(e=>e.remove());
-  const wrap = document.getElementById('map-wrap');
-
-  bloklar.forEach(b => {
-    const count = musteriler.filter(m=>m.blokId===b.id).length;
-    const badge = document.createElement('div');
-    badge.className = 'blok-badge';
-    badge.style.left = b.cx + '%';
-    badge.style.top  = b.cy + '%';
-    badge.innerHTML = `
-      <div class="bb-circle" style="background:${b.color};width:${count>0?52:44}px;height:${count>0?52:44}px">
-        <span>${esc(b.name)}</span>
-      </div>
-      <div class="bb-count">${count > 0 ? count+' kişi' : 'boş'}</div>
-    `;
-    badge.onclick = () => openBlokPopup(b.id);
-    wrap.appendChild(badge);
-  });
-}
-
-function updateInfo() {
-  const total  = musteriler.length;
-  const teslim = musteriler.filter(m=>m.teslim).length;
-  document.getElementById('tb-info').textContent = `${total} müşteri · ${teslim} teslim`;
-}
-
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // BLOK POPUP
-// ════════════════════════════════════════════════════
-function openBlokPopup(blokId) {
-  activeBlokId = blokId;
-  const blok = bloklar.find(b=>b.id===blokId);
-  document.getElementById('bp-dot').style.background = blok.color;
-  document.getElementById('bp-title').textContent = blok.name;
-
-  // Position popup near center
-  const popup = document.getElementById('blok-popup');
-  popup.style.top  = '50%';
-  popup.style.left = '50%';
-  popup.style.transform = 'translate(-50%,-50%)';
-
-  renderBlokPopup();
-  popup.classList.add('show');
-  setTimeout(()=>document.getElementById('new-m-input').focus(),50);
+// ══════════════════════════════════════════════
+function openBlokSheet(id){
+  activeBlokId=id;
+  const b=bloklar.find(x=>x.id===id);
+  document.getElementById('bs-dot').style.background=b.color;
+  document.getElementById('bs-title').textContent=b.name;
+  renderBlokSheet();
+  document.getElementById('blok-overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('new-m-name').focus(),200);
 }
-
-function closeBlokPopup() {
-  document.getElementById('blok-popup').classList.remove('show');
-  activeBlokId = null;
+function closeBlokSheet(){
+  document.getElementById('blok-overlay').classList.remove('show');
+  activeBlokId=null;
 }
-
-function renderBlokPopup() {
-  const ms = musteriler.filter(m=>m.blokId===activeBlokId).sort((a,b)=>a.order-b.order);
-  const el = document.getElementById('bp-musteri-list');
-  if (ms.length === 0) {
-    el.innerHTML = '<div style="font-size:12px;color:#444;padding:8px 0;font-family:monospace">Henüz müşteri eklenmedi</div>';
-    return;
-  }
-  el.innerHTML = ms.map((m,i) => `
-    <div class="musteri-row">
-      <div class="m-order">${i+1}.</div>
+function renderBlokSheet(){
+  const ms=musteriler.filter(m=>m.blokId===activeBlokId).sort((a,b)=>a.order-b.order);
+  const el=document.getElementById('bs-list');
+  if(!ms.length){el.innerHTML='<div style="font-size:12px;color:#333;padding:8px 0;font-family:monospace">Henüz müşteri eklenmedi</div>';return}
+  el.innerHTML=ms.map((m,i)=>`
+    <div class="m-row">
+      <div class="m-num">${i+1}.</div>
       <div class="m-info">
         <div class="m-name">${esc(m.adi)}</div>
         ${m.not?`<div class="m-note">${esc(m.not)}</div>`:''}
       </div>
-      <button class="m-teslim ${m.teslim?'done':''}" onclick="toggleTeslimPopup('${m.id}')">
-        ${m.teslim?'✓ TESLİM':'TESLİM ET'}
-      </button>
-      <button class="m-edit" onclick="editMusteri('${m.id}')" title="Düzenle">⚙</button>
-      <button class="m-del" onclick="delMusteri('${m.id}')" title="Sil">✕</button>
-    </div>
-  `).join('');
+      <button class="m-teslim ${m.teslim?'done':''}" onclick="toggleTeslimSheet('${m.id}')">${m.teslim?'✓':'TESLİM'}</button>
+      <button class="m-act" onclick="openEditM('${m.id}')">✏</button>
+      <button class="m-act" style="color:#E63329" onclick="delMusteri('${m.id}')">✕</button>
+    </div>`).join('');
+}
+function editBlokName(){
+  const b=bloklar.find(x=>x.id===activeBlokId);
+  const n=prompt('Yeni blok adı:',b.name);
+  if(n&&n.trim()){b.name=n.trim();document.getElementById('bs-title').textContent=b.name;renderAll();}
+}
+function deleteBlok(){
+  if(!confirm('Bu bloğu ve müşterileri sil?')) return;
+  bloklar=bloklar.filter(b=>b.id!==activeBlokId);
+  musteriler=musteriler.filter(m=>m.blokId!==activeBlokId);
+  closeBlokSheet(); renderAll();
 }
 
-function addMusteri() {
-  const adi  = document.getElementById('new-m-input').value.trim();
-  const not  = document.getElementById('new-m-note').value.trim();
-  if (!adi || !activeBlokId) return;
+// ══════════════════════════════════════════════
+// MÜŞTERİ
+// ══════════════════════════════════════════════
+function addMusteri(){
+  const adi=document.getElementById('new-m-name').value.trim();
+  const not=document.getElementById('new-m-note').value.trim();
+  if(!adi||!activeBlokId) return;
   orderSeq++;
-  musteriler.push({ id:uid(), blokId:activeBlokId, adi, not, teslim:false, order:orderSeq });
-  document.getElementById('new-m-input').value = '';
-  document.getElementById('new-m-note').value = '';
-  document.getElementById('new-m-input').focus();
-  renderBlokPopup();
-  renderBadges();
-  renderDagitim();
-  updateInfo();
+  musteriler.push({id:uid(),blokId:activeBlokId,adi,not,teslim:false,order:orderSeq});
+  document.getElementById('new-m-name').value='';
+  document.getElementById('new-m-note').value='';
+  document.getElementById('new-m-name').focus();
+  renderBlokSheet(); renderBadges(); updateStat();
 }
-
-function toggleTeslimPopup(id) {
-  const m = musteriler.find(x=>x.id===id);
-  if (m) m.teslim = !m.teslim;
-  renderBlokPopup();
-  renderBadges();
-  renderDagitim();
-  updateInfo();
+function toggleTeslimSheet(id){
+  const m=musteriler.find(x=>x.id===id);
+  if(m) m.teslim=!m.teslim;
+  renderBlokSheet(); renderBadges(); updateStat();
 }
-
-function delMusteri(id) {
-  musteriler = musteriler.filter(m=>m.id!==id);
-  renderBlokPopup();
-  renderBadges();
-  renderDagitim();
-  updateInfo();
+function delMusteri(id){
+  musteriler=musteriler.filter(m=>m.id!==id);
+  renderBlokSheet(); renderBadges(); updateStat();
 }
-
-function editMusteri(id) {
-  const m = musteriler.find(x=>x.id===id);
-  const newAdi = prompt('Müşteri adı:', m.adi);
-  if (newAdi === null) return;
-  if (newAdi.trim()) m.adi = newAdi.trim();
-  const newNot = prompt('Not:', m.not||'');
-  if (newNot !== null) m.not = newNot.trim();
-  renderBlokPopup();
-  renderBadges();
-  renderDagitim();
+function openEditM(id){
+  editMId=id;
+  const m=musteriler.find(x=>x.id===id);
+  document.getElementById('edit-m-name').value=m.adi;
+  document.getElementById('edit-m-note').value=m.not||'';
+  document.getElementById('edit-m-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('edit-m-name').focus(),100);
 }
-
-// ════════════════════════════════════════════════════
-// DAĞITIM PANEL
-// ════════════════════════════════════════════════════
-function toggleDagitim() {
-  const panel = document.getElementById('dagitim-panel');
-  panel.classList.toggle('show');
-  document.getElementById('btn-dagitim').classList.toggle('active', panel.classList.contains('show'));
-  if (panel.classList.contains('show')) renderDagitim();
-}
-
-function renderDagitim() {
-  const sorted = [...musteriler].sort((a,b)=>a.order-b.order);
-  const el = document.getElementById('dp-body');
-  if (sorted.length === 0) {
-    el.innerHTML = '<div style="font-size:11px;color:#333;font-family:monospace;padding:16px;text-align:center">Müşteri ekleyin</div>';
-    return;
+function closeEditM(){document.getElementById('edit-m-modal').classList.remove('show');editMId=null}
+function saveEditM(){
+  const m=musteriler.find(x=>x.id===editMId);
+  if(m){
+    m.adi=document.getElementById('edit-m-name').value.trim()||m.adi;
+    m.not=document.getElementById('edit-m-note').value.trim();
   }
-  let idx = 0;
-  el.innerHTML = sorted.map(m => {
-    const blok = bloklar.find(b=>b.id===m.blokId);
-    const label = m.teslim ? '✓ TESLİM' : `${++idx}. GİDECEK`;
-    return `<div class="dp-item ${m.teslim?'teslim':''}">
-      <div class="dp-order">${label}</div>
+  closeEditM(); renderBlokSheet(); renderBadges(); updateStat();
+}
+document.getElementById('edit-m-name').addEventListener('keydown',e=>{if(e.key==='Enter')saveEditM()});
+
+// ══════════════════════════════════════════════
+// DAĞITIM
+// ══════════════════════════════════════════════
+function openDagitim(){
+  renderDagitim();
+  document.getElementById('dag-overlay').classList.add('show');
+}
+function closeDagitim(){document.getElementById('dag-overlay').classList.remove('show')}
+function renderDagitim(){
+  const sorted=[...musteriler].sort((a,b)=>a.order-b.order);
+  const el=document.getElementById('dag-list');
+  if(!sorted.length){el.innerHTML='<div style="font-size:12px;color:#333;padding:12px;text-align:center;font-family:monospace">Henüz müşteri yok</div>';return}
+  let idx=0;
+  el.innerHTML=sorted.map(m=>{
+    const b=bloklar.find(x=>x.id===m.blokId);
+    const lbl=m.teslim?'✓ TESLİM':`${++idx}. GİDECEK`;
+    return`<div class="dp-item ${m.teslim?'done-item':''}">
+      <div class="dp-ord">${lbl}</div>
       <div class="dp-name">${esc(m.adi)}</div>
-      <div class="dp-blok">${blok?`<span style="color:${blok.color}">●</span> ${esc(blok.name)}`:'—'}${m.not?` · ${esc(m.not)}`:''}</div>
-      <div class="dp-actions">
-        <button class="dp-up" onclick="moveOrder('${m.id}',-1)">↑</button>
-        <button class="dp-dn" onclick="moveOrder('${m.id}',1)">↓</button>
+      <div class="dp-blok">${b?`<span style="color:${b.color}">●</span> ${esc(b.name)}`:'—'}${m.not?` · ${esc(m.not)}`:''}</div>
+      <div class="dp-acts">
+        <button class="dp-mv" onclick="mvOrder('${m.id}',-1)">↑</button>
+        <button class="dp-mv" onclick="mvOrder('${m.id}',1)">↓</button>
         <button class="dp-teslim ${m.teslim?'done':''}" onclick="toggleTeslimDp('${m.id}')">
           ${m.teslim?'✓ TESLİM EDİLDİ':'📦 TESLİM ET'}
         </button>
       </div>
     </div>`;
   }).join('');
-
-  const total  = musteriler.length;
-  const teslim = musteriler.filter(m=>m.teslim).length;
-  document.getElementById('dp-footer').innerHTML =
+  const total=musteriler.length, teslim=musteriler.filter(m=>m.teslim).length;
+  document.getElementById('dag-summary').innerHTML=
     `Toplam: ${total} &nbsp;·&nbsp; <span style="color:#4caf82">Teslim: ${teslim}</span> &nbsp;·&nbsp; <span style="color:#f5c842">Bekleyen: ${total-teslim}</span>`;
 }
-
-function moveOrder(id, dir) {
-  const sorted = [...musteriler].sort((a,b)=>a.order-b.order);
-  const i = sorted.findIndex(m=>m.id===id);
-  const j = i + dir;
-  if (j < 0 || j >= sorted.length) return;
-  const tmp = sorted[i].order; sorted[i].order = sorted[j].order; sorted[j].order = tmp;
-  renderDagitim(); updateInfo();
+function mvOrder(id,dir){
+  const sorted=[...musteriler].sort((a,b)=>a.order-b.order);
+  const i=sorted.findIndex(m=>m.id===id),j=i+dir;
+  if(j<0||j>=sorted.length) return;
+  [sorted[i].order,sorted[j].order]=[sorted[j].order,sorted[i].order];
+  renderDagitim();
+}
+function toggleTeslimDp(id){
+  const m=musteriler.find(x=>x.id===id);
+  if(m) m.teslim=!m.teslim;
+  renderDagitim(); renderBadges(); updateStat();
 }
 
-function toggleTeslimDp(id) {
-  const m = musteriler.find(x=>x.id===id);
-  if (m) m.teslim = !m.teslim;
-  renderDagitim(); renderBadges(); updateInfo();
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function renderAll(){ renderSVG(); renderBadges(); updateStat(); }
+
+function renderSVG(){
+  const svg=document.getElementById('svg-ol');
+  let html='';
+  bloklar.forEach(b=>{
+    if(!b.points||b.points.length<3) return;
+    const pts=b.points.map(p=>`${p.x/100*imgW},${p.y/100*imgH}`).join(' ');
+    html+=`<polygon points="${pts}" fill="${b.color}22" stroke="${b.color}" stroke-width="2.5" stroke-dasharray="7,4"/>`;
+  });
+  renderDrawSVG(html);
 }
 
-// ════════════════════════════════════════════════════
-// UTILS
-// ════════════════════════════════════════════════════
-function uid() { return Math.random().toString(36).slice(2,9); }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-document.getElementById('plan-img').addEventListener('load', ()=>{ setTimeout(renderAll,50); });
-
-// Close popups on Escape
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    cancelDraw();
-    closeBlokPopup();
+function renderDrawSVG(base=''){
+  const svg=document.getElementById('svg-ol');
+  let html=base||svg.innerHTML.replace(/<(circle|polyline|line)[^>]*>/g,''); // keep polygons
+  if(mode==='draw'&&drawPts.length>0){
+    const color=COLORS[colorSeq%COLORS.length];
+    if(drawPts.length>=2){
+      const pts=drawPts.map(p=>`${p.x/100*imgW},${p.y/100*imgH}`).join(' ');
+      html+=`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="6,3"/>`;
+    }
+    drawPts.forEach((p,i)=>{
+      const cx=p.x/100*imgW,cy=p.y/100*imgH;
+      html+=`<circle cx="${cx}" cy="${cy}" r="${i===0?9:5}" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+    });
+    if(drawPts.length>=3){
+      const f=drawPts[0],l=drawPts[drawPts.length-1];
+      html+=`<line x1="${l.x/100*imgW}" y1="${l.y/100*imgH}" x2="${f.x/100*imgW}" y2="${f.y/100*imgH}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,4" opacity=".5"/>`;
+    }
   }
-});
+  svg.innerHTML=html;
+}
+
+function renderBadges(){
+  document.querySelectorAll('.blok-pin').forEach(e=>e.remove());
+  const wrap=document.getElementById('map-wrap');
+  bloklar.forEach(b=>{
+    const count=musteriler.filter(m=>m.blokId===b.id).length;
+    const teslim=musteriler.filter(m=>m.blokId===b.id&&m.teslim).length;
+    const size=Math.max(48,44+count*2);
+    const div=document.createElement('div');
+    div.className='blok-pin';
+    div.style.left=b.cx+'%';
+    div.style.top=b.cy+'%';
+    div.innerHTML=`
+      <div class="pin-circle" style="background:${b.color};width:${size}px;height:${size}px;font-size:${count>9?9:10}px">
+        ${esc(b.name)}
+      </div>
+      <div class="pin-count" style="border-color:${b.color}">${count?`${count} kişi${teslim?` · ${teslim}✓`:''}`:count===0?'boş':''}</div>
+    `;
+    div.addEventListener('click',e=>{e.stopPropagation();openBlokSheet(b.id)});
+    div.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();openBlokSheet(b.id)});
+    wrap.appendChild(div);
+  });
+}
+
+function updateStat(){
+  const t=musteriler.length,tl=musteriler.filter(m=>m.teslim).length;
+  document.getElementById('tb-stat').textContent=`${t} müşteri · ${tl} teslim`;
+}
+
+// ══════════════════════════════════════════════
+// HINT BAR
+// ══════════════════════════════════════════════
+let hintTimeout;
+function showHint(txt){
+  let bar=document.getElementById('hint-bar');
+  if(!bar){bar=document.createElement('div');bar.id='hint-bar';bar.style.cssText='position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #f5c842;padding:8px 16px;font-size:11px;font-family:monospace;color:#f5c842;border-radius:4px;z-index:60;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.5)';document.body.appendChild(bar)}
+  bar.textContent=txt; bar.style.display='block';
+  clearTimeout(hintTimeout); hintTimeout=setTimeout(hideHint,3000);
+}
+function hideHint(){const b=document.getElementById('hint-bar');if(b)b.style.display='none'}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function uid(){return Math.random().toString(36).slice(2,9)}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+document.getElementById('plan-img').addEventListener('load',()=>setTimeout(renderAll,50));
 </script>
 </body>
 </html>
-  const total  = musteriler.length;
-  const teslim = musteriler.filter(m=>m.teslim).length;
-  document.getElem
