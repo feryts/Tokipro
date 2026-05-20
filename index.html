@@ -156,11 +156,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#111;color:#e8e8e8;f
 <div id="mapbox">
   <div id="upscreen">
     <div class="icon">🏗️</div>
-    <p>Vaziyet planını yükleyin</p>
+    <p style="color:#555;font-size:13px">Harita ve veri yükleyin</p>
+
     <label id="uplbl">
-      📂 HARİTA YÜKLE
+      🗺 HARİTA YÜKLE (PNG/JPG)
       <input type="file" accept="image/*" onchange="loadImg(this)">
     </label>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:4px 0">
+      <div style="flex:1;height:1px;background:#2a2a2a"></div>
+      <span style="color:#333;font-size:11px;font-family:monospace">VEYA</span>
+      <div style="flex:1;height:1px;background:#2a2a2a"></div>
+    </div>
+
+    <label style="background:#1a1a1a;border:2px solid #f5c842;color:#f5c842;font-weight:700;font-size:14px;padding:14px 28px;border-radius:4px;cursor:pointer;letter-spacing:1px;display:block;text-align:center">
+      📂 KAYITLI VERİ YÜKLE (JSON)
+      <input type="file" accept=".json" style="display:none" onchange="loadJSON(this)">
+    </label>
+
+    <p style="color:#333;font-size:11px;font-family:monospace;margin-top:4px">Önceki günün kayıt dosyasını yükleyin</p>
   </div>
   <div id="wrap">
     <img id="img" src="" alt="" draggable="false">
