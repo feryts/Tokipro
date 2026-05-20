@@ -140,15 +140,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#111;color:#e8e8e8;f
     🗺 HARİTA
     <input type="file" accept="image/*" style="display:none" onchange="loadImg(this)">
   </label>
+  <label class="tb" style="cursor:pointer;display:flex;align-items:center;background:#1a3a1a;color:#4caf82;border-left:1px solid #4caf82">
+    📂 JSON YÜKLE
+    <input type="file" accept=".json" style="display:none" id="json-input" onchange="loadJSON(this)">
+  </label>
   <button class="tb" id="tbBlok" onclick="startPlace()">📍 BLOK</button>
   <button class="tb" id="tbCiz" onclick="startDraw()">✏ ÇİZ</button>
   <button class="tb" onclick="openSheet('musteri')">👤 MÜŞTERİ</button>
   <button class="tb" onclick="openSheet('dagitim')">📋 DAĞITIM</button>
   <button class="tb" onclick="saveJSON()">💾 KAYDET</button>
-  <label class="tb" style="cursor:pointer;display:flex;align-items:center">
-    📂 YÜKLE
-    <input type="file" accept=".json" style="display:none" onchange="loadJSON(this)">
-  </label>
   <div id="stat">0 kişi</div>
 </div>
 
