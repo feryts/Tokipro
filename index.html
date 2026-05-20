@@ -641,4 +641,137 @@ function doSearch(val) {
       document.getElementById('mode-bar').classList.remove('show');
     }
 
-    document.getElementById('result-card').classList.add('s
+    document.getElementById('result-card').classList.add('show');
+    highlightRow(rec);
+  } else {
+    currentFound = null;
+    document.getElementById('result-card').classList.remove('show');
+    document.getElementById('mode-bar').classList.remove('show');
+    clearMarkers();
+    document.querySelectorAll('#tbl-body tr').forEach(r => r.classList.remove('hl'));
+  }
+}
+
+function findCoords(blok) {
+  if (blockCoords[blok]) return blockCoords[blok];
+  for (const key in blockCoords) {
+    if (key.includes(blok) || blok.includes(key)) return blockCoords[key];
+  }
+  return null;
+}
+
+function highlightRow(rec) {
+  const idx = records.indexOf(rec);
+  document.querySelectorAll('#tbl-body tr').forEach(r => r.classList.remove('hl'));
+  const row = document.getElementById('row-' + idx);
+  if (row) { row.classList.add('hl'); row.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+}
+
+// ─── MARKERS ─────────────────────────────────────────────────────────────────
+function clearMarkers() {
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+}
+
+function placeMarker(xPct, yPct, blok) {
+  clearMarkers();
+  const c = document.getElementById('map-container');
+  const m = document.createElement('div');
+  m.className = 'marker';
+  m.style.left = xPct + '%';
+  m.style.top  = yPct + '%';
+  m.innerHTML = `
+    <div class="marker-pulse"></div>
+    <div class="marker-pin"></div>
+    <div class="marker-lbl">${blok}</div>
+  `;
+  c.appendChild(m);
+}
+
+function renderDots(blocks) {
+  clearDots();
+  const c = document.getElementById('map-container');
+  blocks.forEach(b => {
+    const d = document.createElement('div');
+    d.className = 'dot-mk';
+    d.style.left = b.x + '%';
+    d.style.top  = b.y + '%';
+    c.appendChild(d);
+  });
+}
+
+function clearDots() {
+  document.querySelectorAll('.dot-mk').forEach(d => d.remove());
+}
+
+// ─── MAP CLICK (calibrate) ────────────────────────────────────────────────────
+document.getElementById('map-container').addEventListener('click', function(e) {
+  if (!currentFound) return;
+  const img = document.getElementById('plan-img');
+  const rect = img.getBoundingClientRect();
+  if (e.clientX < rect.left || e.clientX > rect.right) return;
+  if (e.clientY < rect.top  || e.clientY > rect.bottom) return;
+
+  const x = (e.clientX - rect.left) / rect.width  * 100;
+  const y = (e.clientY - rect.top)  / rect.height * 100;
+
+  blockCoords[currentFound.blok] = { x, y };
+  placeMarker(x, y, currentFound.blok);
+  showModeBar(`BLOK ${currentFound.blok} — ${currentFound.adi}`);
+  document.getElementById('r-warn').textContent = '';
+  document.getElementById('cal-note').textContent = `✓ ${currentFound.blok} konumu güncellendi.`;
+});
+
+// ─── MODE BAR ─────────────────────────────────────────────────────────────────
+function showModeBar(txt) {
+  document.getElementById('mode-text').textContent = txt;
+  document.getElementById('mode-bar').classList.add('show');
+}
+
+// ─── ZOOM & PAN ───────────────────────────────────────────────────────────────
+let tx = 0, ty = 0;
+
+function doZoom(f) {
+  scale = Math.min(Math.max(scale * f, 0.3), 6);
+  applyTransform();
+}
+function resetZoom() { scale = 1; tx = 0; ty = 0; applyTransform(); }
+function applyTransform() {
+  document.getElementById('map-container').style.transform =
+    `translate(${tx}px,${ty}px) scale(${scale})`;
+}
+
+document.getElementById('map-area').addEventListener('wheel', e => {
+  e.preventDefault();
+  doZoom(e.deltaY < 0 ? 1.1 : 0.9);
+}, { passive: false });
+
+let dragging = false, sx, sy;
+document.getElementById('map-area').addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  dragging = true; sx = e.clientX - tx; sy = e.clientY - ty;
+});
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  tx = e.clientX - sx; ty = e.clientY - sy;
+  applyTransform();
+});
+document.addEventListener('mouseup', () => dragging = false);
+
+// ─── TAB SWITCH ───────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'csv') || (i === 1 && tab === 'manuel'));
+  });
+  document.getElementById('tab-csv').classList.toggle('active', tab === 'csv');
+  document.getElementById('tab-manuel').classList.toggle('active', tab === 'manuel');
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function setStatus(id, msg, cls) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status ' + cls;
+}
+</script>
+</body>
+</html>
